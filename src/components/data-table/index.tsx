@@ -116,34 +116,7 @@ export function DataTable<T>({
 	}
 
 	const renderPagination = () => {
-		if (!pagination && totalPages <= 1) return null
-
-		/* if (totalPages <= 1)
-			return (
-				<Pagination className='ml-auto'>
-					<PaginationContent>
-						<PaginationItem>
-							<PaginationPrevious disabled />
-						</PaginationItem>
-
-						<PaginationItem>
-							<PaginationButton isActive>1</PaginationButton>
-						</PaginationItem>
-
-						<PaginationItem>
-							<PaginationButton disabled>2</PaginationButton>
-						</PaginationItem>
-
-						<PaginationItem>
-							<PaginationButton disabled>3</PaginationButton>
-						</PaginationItem>
-
-						<PaginationItem>
-							<PaginationNext disabled />
-						</PaginationItem>
-					</PaginationContent>
-				</Pagination>
-			) */
+		if (!pagination || totalPages <= 1) return null
 
 		return (
 			<Pagination className='ml-auto'>

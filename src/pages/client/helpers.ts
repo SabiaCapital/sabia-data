@@ -1,0 +1,1 @@
+export const OPERATIONS_PAGE_SIZE = 10

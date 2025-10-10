@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')!).render(
 		<BrowserRouter>
 			<ThemeProvider storageKey={THEME_STORAGE_KEY} defaultTheme='system'>
 				<UserProvider storageKey={USER_STORAGE_KEY}>
-					<TooltipProvider delayDuration={300}>
+					<TooltipProvider delayDuration={200}>
 						<App />
 					</TooltipProvider>
 				</UserProvider>

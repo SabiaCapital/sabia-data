@@ -7,7 +7,7 @@ import { TrendingUp, User } from 'lucide-react'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { MAIN_PATH } from '@/constants/paths'
 import { formatCurrency, formatPercentage } from '@/utils/number'
-import { formatCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
+import { formatCnpj, isCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
 import { getOperation, getOperationDebtors, getOperationExtra, getClient } from '@/api/black'
 import { getCreditHub } from '@/api/credit-hub'
 import { getMantyz } from '@/api/mantyz'
@@ -33,13 +33,6 @@ import {
 } from '@/components/ui/breadcrumb'
 import { DataTable } from '@/components/data-table'
 import { DEBTORS_PAGE_SIZE, getLastSocietaryChange } from './helpers'
-
-export function isCnpj(value?: string) {
-	if (!value) return false
-
-	const cnpjRegex = /^(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})$/
-	return cnpjRegex.test(value)
-}
 
 export function OperationPage() {
 	const [page, setPage] = useState(1)

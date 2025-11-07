@@ -1,12 +1,12 @@
 import axios from 'axios'
-import { VADU_TOKEN_STORAGE_KEY } from '@/constants/storage'
+/* import { VADU_TOKEN_STORAGE_KEY } from '@/constants/storage' */
 import { UNAUTHORIZED_EVENT } from '@/constants/events'
 
 export const api = axios.create({
 	baseURL: import.meta.env.VITE_VADU_API_URL,
 })
 
-api.interceptors.request.use((config) => {
+/* api.interceptors.request.use((config) => {
 	const token = localStorage.getItem(VADU_TOKEN_STORAGE_KEY)
 
 	if (token) {
@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
 	}
 
 	return config
-})
+}) */
 
 api.interceptors.response.use(
 	(response) => response,

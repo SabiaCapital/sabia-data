@@ -1,4 +1,4 @@
-export function formatCurrency(value?: number | string) {
+export function formatCurrency(value?: number | string | null) {
 	if (value === null || value === undefined) {
 		return value
 	}
@@ -9,7 +9,7 @@ export function formatCurrency(value?: number | string) {
 }
 
 export function formatPercentage(
-	value?: number | string,
+	value?: number | string | null,
 	fractionDigits = 1,
 	scale: 'percent' | 'fraction' = 'percent'
 ) {

@@ -2,9 +2,10 @@ import { useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
-import { BLACK_TOKEN_STORAGE_KEY } from '@/constants/storage'
+import { BLACK_TOKEN_STORAGE_KEY, MANTYZ_TOKEN_STORAGE_KEY } from '@/constants/storage'
 import { UNAUTHORIZED_EVENT } from '@/constants/events'
 import { getToken as getBlackToken } from '@/api/black'
+import { getToken as getMantyzToken } from '@/api/mantyz'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import type { UserProviderProps, UserProviderState } from './types'
 import { UserProviderContext } from './helpers'
@@ -27,10 +28,12 @@ export function UserProvider({ children, storageKey = 'user', ...props }: UserPr
 			}
 
 			const blackToken = await getBlackToken()
+			const mantyzToken = await getMantyzToken()
 
 			setUser(response.data.user)
 
 			localStorage.setItem(BLACK_TOKEN_STORAGE_KEY, blackToken)
+			localStorage.setItem(MANTYZ_TOKEN_STORAGE_KEY, mantyzToken)
 
 			return {
 				success: true,
@@ -61,6 +64,7 @@ export function UserProvider({ children, storageKey = 'user', ...props }: UserPr
 			setUser(null)
 
 			localStorage.removeItem(BLACK_TOKEN_STORAGE_KEY)
+			localStorage.removeItem(MANTYZ_TOKEN_STORAGE_KEY)
 
 			return { success: true }
 		} catch {

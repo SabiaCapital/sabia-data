@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { MANTYZ_TOKEN_STORAGE_KEY } from '@/constants/storage'
 import { UNAUTHORIZED_EVENT } from '@/constants/events'
+import type { GetMantyzResponse } from './types'
 
 export const api = axios.create({
 	baseURL: import.meta.env.VITE_MANTYZ_API_URL,
@@ -36,29 +37,14 @@ export async function getToken() {
 	return response.data.content.access_token
 }
 
-export async function getBigDataCadastralQueries({
-	ano = 2025,
-	mes = 0,
-	filtro = '',
-	num_paginas = 3,
-	pagina = 1,
-	id_tipo_consulta = null,
-}: {
-	ano?: number
-	mes?: number
-	filtro?: string
-	num_paginas?: number
-	pagina?: number
-	id_tipo_consulta?: number | null
-}) {
-	const response = await api.post('bigdata/api/ConsultaCadastral/ListarConsultas', {
-		ano,
-		mes,
-		filtro,
-		num_paginas,
-		pagina,
-		id_tipo_consulta,
-	})
+export async function getMantyz(cnpj: string) {
+	const response = await api.post<GetMantyzResponse>(
+		'bigdata/api/ConsultaCadastral/PesquisaDocumento',
+		{
+			id_tipo: 2,
+			cnpj_cpf: cnpj,
+		}
+	)
 
-	return response.data
+	return response.data.content
 }

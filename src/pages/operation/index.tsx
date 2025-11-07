@@ -7,10 +7,10 @@ import { TrendingUp, User } from 'lucide-react'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { MAIN_PATH } from '@/constants/paths'
 import { formatCurrency, formatPercentage } from '@/utils/number'
-import { formatCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
-import { getOperation, getOperationDebtors, getOperationExtra } from '@/api/black'
-import { getClient } from '@/api/black'
+import { formatCnpj, isCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
+import { getOperation, getOperationDebtors, getOperationExtra, getClient } from '@/api/black'
 import { getCreditHub } from '@/api/credit-hub'
+import { getMantyz } from '@/api/mantyz'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -33,13 +33,6 @@ import {
 } from '@/components/ui/breadcrumb'
 import { DataTable } from '@/components/data-table'
 import { DEBTORS_PAGE_SIZE, getLastSocietaryChange } from './helpers'
-
-export function isCnpj(value?: string) {
-	if (!value) return false
-
-	const cnpjRegex = /^(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})$/
-	return cnpjRegex.test(value)
-}
 
 export function OperationPage() {
 	const [page, setPage] = useState(1)
@@ -91,28 +84,42 @@ export function OperationPage() {
 		enabled: !!operationId,
 	})
 
-	const debtorsCnpjs = debtors?.items.map((d) => d.sacadoCnpj) || []
+	const debtorsCnpjs = debtors?.items.map((d) => formatCnpj(d.sacadoCnpj, { unmask: true })) || []
 
 	const creditHubQueries = useQueries({
 		queries: debtorsCnpjs.map((cnpj) => ({
 			queryKey: ['creditHub', cnpj],
-			queryFn: () => getCreditHub(formatCnpj(cnpj, { unmask: true })),
+			queryFn: () => getCreditHub(cnpj),
 			enabled: !!cnpj,
 		})),
 	})
-
 	const isFetchingCreditHub = creditHubQueries.some((q) => q.isFetching)
 	const creditHubHasError = creditHubQueries.some((q) => q.isError)
+
+	const mantyzQueries = useQueries({
+		queries: debtorsCnpjs.map((cnpj) => ({
+			queryKey: ['mantyz', cnpj],
+			queryFn: () => getMantyz(cnpj),
+			enabled: !!cnpj,
+		})),
+	})
+	const isFetchingMantyz = mantyzQueries.some((q) => q.isFetching)
+	const mantyzHasError = mantyzQueries.some((q) => q.isError)
 
 	const isLoading =
 		isFetchingOperation ||
 		isFetchingOperationExtra ||
 		isFetchingClient ||
 		isFetchingDebtors ||
-		isFetchingCreditHub
+		isFetchingCreditHub ||
+		isFetchingMantyz
 
 	const hasPartialError =
-		operationExtraHasError || clientHasError || debtorsHasError || creditHubHasError
+		operationExtraHasError ||
+		clientHasError ||
+		debtorsHasError ||
+		creditHubHasError ||
+		mantyzHasError
 
 	useEffect(() => {
 		if (isLoading) return
@@ -222,7 +229,7 @@ export function OperationPage() {
 						</div>
 
 						<div className='flex items-center gap-2'>
-							<span className='font-medium'>Taxa:</span>
+							<span className='font-medium'>Taxa da operação:</span>
 
 							{isFetchingOperationExtra ? (
 								<Skeleton className='h-5 w-12' />
@@ -235,7 +242,7 @@ export function OperationPage() {
 						</div>
 
 						<div className='flex items-center gap-2'>
-							<span className='font-medium'>Risco:</span>
+							<span className='font-medium'>Valor da operação:</span>
 
 							{isFetchingOperationExtra ? (
 								<Skeleton className='h-5 w-24' />
@@ -264,7 +271,7 @@ export function OperationPage() {
 
 				<Card className='w-full'>
 					<CardHeader>
-						<CardDescription>Cedente</CardDescription>
+						<CardDescription>Cedente da operação</CardDescription>
 
 						<CardTitle className='text-2xl font-semibold'>
 							{isFetchingOperation ? (
@@ -307,7 +314,7 @@ export function OperationPage() {
 						</div>
 
 						<div className='flex items-center gap-2'>
-							<span className='font-medium'>Taxa:</span>
+							<span className='font-medium'>Taxa de cadastro:</span>
 
 							{isFetchingOperationExtra ? (
 								<Skeleton className='h-5 w-12' />
@@ -349,7 +356,6 @@ export function OperationPage() {
 							</div>
 						),
 					},
-
 					{
 						key: 'operacao',
 						header: 'Valores',
@@ -377,7 +383,7 @@ export function OperationPage() {
 						key: 'ultimaOperacao',
 						header: 'Última operação',
 						render: (row) => (
-							<div className='flex h-full flex-col gap-1'>
+							<div className='flex flex-col gap-1'>
 								<span>
 									Número:{' '}
 									{!row.ultimaOperacao || row.ultimaOperacao === '0'
@@ -452,7 +458,10 @@ export function OperationPage() {
 
 									<span>
 										Quantidade REFIN:{' '}
-										{creditHub?.refin?.spc.flat().length ?? 'Consultando...'}
+										{creditHub?.refin?.spc
+											.flat()
+											.filter((item) => Object.keys(item).length > 0)
+											.length ?? 'Consultando...'}
 									</span>
 
 									<span>
@@ -461,7 +470,8 @@ export function OperationPage() {
 											creditHub?.refin?.spc
 												.flat()
 												.reduce(
-													(acc, item) => acc + parseFloat(item.Valor),
+													(acc, item) =>
+														acc + parseFloat(item.Valor || '0'),
 													0
 												)
 										) ?? 'Consultando...'}
@@ -492,8 +502,63 @@ export function OperationPage() {
 							)
 						},
 					},
+					{
+						key: 'porcentagemOperacao',
+						header: 'Mantyz',
+						render: (_, rowIndex) => {
+							const { data: mantyz } = mantyzQueries[rowIndex]
+
+							/* const isEnterprise = mantyz?.pessoa_juridica */
+
+							return (
+								<div className='flex flex-col gap-1'>
+									<span>
+										Quantidade PEFIN:{' '}
+										{mantyz?.pessoa_juridica?.pendencias_financeiras
+											.restritivo_mercado.qtd_pefin ?? 0}
+									</span>
+
+									<span>
+										Valor PEFIN:{' '}
+										{formatCurrency(
+											mantyz?.pessoa_juridica?.pendencias_financeiras
+												.restritivo_mercado.valor_pefin ?? 0
+										)}
+									</span>
+
+									<span>
+										Quantidade REFIN:{' '}
+										{mantyz?.pessoa_juridica?.pendencias_financeiras
+											.restritivo_mercado.qtd_refin ?? 0}
+									</span>
+
+									<span>
+										Valor REFIN:{' '}
+										{formatCurrency(
+											mantyz?.pessoa_juridica?.pendencias_financeiras
+												.restritivo_mercado.valor_refin ?? 0
+										)}
+									</span>
+
+									<span>
+										Processos trabalhistas:{' '}
+										{mantyz?.pessoa_juridica?.pendencias_financeiras.acoes
+											.acoes_trabalhistas.length ?? 0}
+									</span>
+
+									<span>
+										PGFN:{' '}
+										{formatCurrency(
+											mantyz?.pessoa_juridica?.pendencias_financeiras
+												.pgfn_debito_governo?.valor_total_debito ?? 0
+										)}
+									</span>
+								</div>
+							)
+						},
+					},
 				]}
-				isLoading={isFetchingDebtors || isFetchingCreditHub}
+				isLoading={isFetchingDebtors || isFetchingCreditHub || isFetchingMantyz}
 				isError={debtorsHasError}
 				pagination={{
 					page,

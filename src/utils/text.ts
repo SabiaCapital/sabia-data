@@ -6,6 +6,13 @@ export function formatCnpj(cnpj: string, { unmask = false }: { unmask?: boolean 
 	return digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
 }
 
+export function isCnpj(value?: string) {
+	if (!value) return false
+
+	const cnpjRegex = /^(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})$/
+	return cnpjRegex.test(value)
+}
+
 export function getEmailLocalPart(email: string) {
 	const [localPart] = email.split('@')
 	return localPart

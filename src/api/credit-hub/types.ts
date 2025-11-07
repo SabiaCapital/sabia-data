@@ -120,16 +120,16 @@ type CreditHub = {
 			DataConsulta: string
 		}[]
 		spc: {
-			NomeAssociado: string
-			Valor: string
-			DataDeInclusao: string
-			DataDoVencimento: string
-			Entidade: string
-			NumeroContrato: string
-			CompradorFiadorAvalista: string
-			TelefoneAssociado: string
-			CidadeAssociado: string
-			UfAssociado: string
+			NomeAssociado?: string
+			Valor?: string
+			DataDeInclusao?: string
+			DataDoVencimento?: string
+			Entidade?: string
+			NumeroContrato?: string
+			CompradorFiadorAvalista?: string
+			TelefoneAssociado?: string
+			CidadeAssociado?: string
+			UfAssociado?: string
 		}[][]
 		consultaRealizada: any[]
 	}

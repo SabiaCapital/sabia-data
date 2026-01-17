@@ -2,16 +2,15 @@ import { useState } from 'react'
 import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { useIsMobile } from '@/hooks/use-is-mobile'
-import logo from '@/assets/images/logo.png'
-import logoSmall from '@/assets/images/logo-small.png'
 import { getEmailLocalPart } from '@/utils/text'
 import { useUser } from '@/hooks/use-user'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
+import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 
 export function Header() {
 	const [isLoading, setIsLoading] = useState(false)
 	const { user, logout } = useUser()
+	const { open } = useSidebar()
 	const isMobile = useIsMobile()
 
 	const handleLogout = async () => {
@@ -28,21 +27,15 @@ export function Header() {
 	}
 
 	return (
-		<header className='relative flex h-16 flex-row-reverse items-center justify-end gap-6 border-b px-10 md:justify-center'>
-			<div className='left-10 flex items-center md:absolute'>
-				<ThemeToggle />
-			</div>
+		<header
+			className={`bg-background fixed top-0 right-0 shadow-xs ${open && !isMobile ? 'left-(--sidebar-width)' : 'left-0'} z-10 flex h-16 items-center justify-between border-b px-6 transition-[left] duration-200 ease-linear md:px-8`}
+		>
+			<SidebarTrigger />
 
-			<img
-				className='h-6 invert-90 md:h-8 dark:invert-5'
-				src={isMobile ? logoSmall : logo}
-				alt=''
-			/>
-
-			<div className='absolute right-10 flex items-center gap-4'>
+			<div className='flex items-center gap-4'>
 				{!!user?.email && (
 					<span className='text-muted-foreground text-sm'>
-						{getEmailLocalPart(user.email)}
+						{isMobile ? getEmailLocalPart(user.email) : user.email}
 					</span>
 				)}
 

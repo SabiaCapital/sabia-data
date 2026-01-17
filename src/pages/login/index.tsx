@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { zodResolver } from '@hookform/resolvers/zod'
-import logoSmall from '@/assets/images/logo-small.png'
 import cover from '@/assets/images/cover.jpg'
 import { getEmailLocalPart } from '@/utils/text'
 import { useUser } from '@/hooks/use-user'
@@ -17,6 +16,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from '@/components/ui/form'
+import { Logo } from '@/components/logo'
 
 const formSchema = z.object({
 	email: z.email('O email deve possuir um formato válido'),
@@ -30,8 +30,8 @@ export function LoginPage() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			email: '',
-			password: '',
+			email: 'douglasdduarte@outlook.com',
+			password: '@Sabia123',
 		},
 	})
 
@@ -67,10 +67,10 @@ export function LoginPage() {
 	}
 
 	return (
-		<div className='grid min-h-svh lg:grid-cols-2'>
+		<div className='grid min-h-svh w-full lg:grid-cols-2'>
 			<div className='relative flex flex-col gap-4 p-10'>
-				<div className='absolute top-0 left-0 flex w-full justify-center gap-2 p-10 md:justify-start'>
-					<img className='h-8 invert-90 dark:invert-5' src={logoSmall} alt='' />
+				<div className='absolute top-0 left-0 flex w-full justify-center p-10 lg:justify-start'>
+					<Logo className='h-10 w-14' isSmall />
 				</div>
 
 				<div className='flex flex-1 items-center justify-center'>
@@ -139,9 +139,9 @@ export function LoginPage() {
 
 			<div className='bg-muted hidden max-h-screen lg:block'>
 				<img
-					src={cover}
-					alt='Image'
 					className='h-full w-full object-cover opacity-35 dark:opacity-15'
+					src={cover}
+					alt=''
 				/>
 			</div>
 		</div>

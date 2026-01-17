@@ -11,5 +11,9 @@
 - [ ] Finalizar página do cedente
 - [ ] Melhorar versão mobile
 - [ ] Finalizar isEnterprise da mantyz
+- [ ] Botão pra atualizar dados em cada card do "Pesquisar CNPJ"
+- [ ] Importar icons lucide com o sufixo Icon e estilizar apenas via className
+- [ ] Usar React.tanana para todos os types
+- [ ] Usar signal também na mantyz
 
 - Exemplo de operação com sacados cpf: a2000000-0000-0000-0000-000000000012

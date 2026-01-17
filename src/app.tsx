@@ -1,10 +1,17 @@
 import type { JSX } from 'react'
 import { Routes, Route, Navigate } from 'react-router'
-import { LOGIN_PATH, MAIN_PATH, OPERATION_PATH, CLIENT_PATH } from '@/constants/paths'
+import {
+	LOGIN_PATH,
+	MAIN_PATH,
+	OPERATIONS_PATH,
+	OPERATION_PATH,
+	CNPJ_SEARCH_PATH,
+} from '@/constants/paths'
 import { LoginPage } from '@/pages/login'
 import { MainPage } from '@/pages/main'
+import { OperationsPage } from '@/pages/operations'
 import { OperationPage } from '@/pages/operation'
-import { ClientPage } from '@/pages/client'
+import { CnpjSearchPage } from '@/pages/cnpj-search'
 import { Toaster } from '@/components/ui/sonner'
 import { Router } from '@/components/router'
 
@@ -25,18 +32,22 @@ const routes: Route[] = [
 		element: MainPage,
 	},
 	{
+		path: OPERATIONS_PATH,
+		element: OperationsPage,
+	},
+	{
 		path: OPERATION_PATH,
 		element: OperationPage,
 	},
 	{
-		path: CLIENT_PATH,
-		element: ClientPage,
+		path: CNPJ_SEARCH_PATH,
+		element: CnpjSearchPage,
 	},
 ]
 
 export function App() {
 	return (
-		<div className='flex min-h-screen flex-col'>
+		<div className='min-h-screen w-full'>
 			<Routes>
 				{routes.map(({ path, element: Page, isAuth }) => (
 					<Route

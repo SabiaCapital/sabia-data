@@ -5,8 +5,9 @@ export const api = axios.create({
 	baseURL: `${import.meta.env.VITE_CREDIT_HUB_API_URL}/${import.meta.env.VITE_CREDIT_HUB_API_KEY}`,
 })
 
-export async function getCreditHub(cnpj: string) {
+export async function getCreditHub(cnpj: string, signal?: any) {
 	const response = await api.get<GetCreditHubResponse>(cnpj, {
+		signal,
 		params: {
 			refin: true,
 			pefin: true,

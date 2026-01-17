@@ -1,4 +1,5 @@
 export const MAIN_PATH = '/'
 export const LOGIN_PATH = '/login'
+export const OPERATIONS_PATH = '/operacoes'
 export const OPERATION_PATH = '/operacoes/:operationId'
-export const CLIENT_PATH = '/cedentes/:clientId'
+export const CNPJ_SEARCH_PATH = '/pesquisar-cnpj'

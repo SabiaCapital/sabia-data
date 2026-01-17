@@ -175,7 +175,7 @@ export function DataTable<T>({
 
 					{search && (
 						<div className='flex w-full items-center gap-3'>
-							<Search size={20} />
+							<Search className='shrink-0' size={20} />
 
 							<Input
 								placeholder={search.placeholder}

@@ -12,7 +12,7 @@
 - [ ] Melhorar versão mobile
 - [ ] Finalizar isEnterprise da mantyz
 - [ ] Botão pra atualizar dados em cada card do "Pesquisar CNPJ"
-- [ ] Importar icons lucide com o sufixo Icon apenas quando realmente precisar (a princípio esse é o padrão do shadcn)
+- [ ] Importar icons lucide com o sufixo Icon e estilizar apenas via className
 - [ ] Usar React.tanana para todos os types
 - [ ] Usar signal também na mantyz
 

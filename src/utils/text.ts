@@ -1,4 +1,6 @@
-export function formatCnpj(cnpj: string, { unmask = false }: { unmask?: boolean } = {}) {
+export function formatCnpj(cnpj?: string, { unmask = false }: { unmask?: boolean } = {}) {
+	if (cnpj === undefined || cnpj === null) return ''
+
 	const digits = cnpj.replace(/[^\d]+/g, '')
 
 	if (unmask) return digits

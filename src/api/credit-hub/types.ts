@@ -82,13 +82,59 @@ type CreditHub = {
 		dataSaida: string
 		valorParticipacao: string
 	}[]
-	participacoesEmpresas: any[]
+	participacoesEmpresas: {
+		posicao: string
+		documento: string
+		nome: string
+		participacao: string
+		qualificacaoSocio: string
+		dataEntrada: string
+		dataSaida: string
+		valorParticipacao: string
+	}[]
 	quantidade_dividas: number
 	valor_total_dividas: number
 	dividas: any[]
 	historico_consultas: {
 		usuario: string
 		ultimaConsulta: string
+	}[]
+	ccf: {
+		bancos: {
+			banco: string
+			agencia: string
+			qteOcorrencias: string
+			ultimo: string
+			motivo: string
+		}[]
+		qtdRegistros: number
+		historico: {
+			quantidade: number
+			dataConsulta: string
+		}[]
+	}
+	processos: {
+		id: string
+		numero_antigo: string | null
+		numero_novo: string | null
+		created_at: string | null
+		updated_at: string | null
+		tipo_envolvido: string | null
+		diario_sigla: string | null
+		diario_nome: string | null
+		estado: string | null
+		data_movimentacoes: string | null
+		quantidade_movimentacoes: number | null
+		classe_processual: string | null
+		assuntos: string | null
+		envolvidos_ultima_movimentacao: {
+			nome: string
+			nome_sem_filtro: string
+			envolvido_tipo: string | null
+			envolvido_extra_nome: string | null
+			oab: string | null
+			advogado_de: string | null
+		}[]
 	}[]
 	refin?: {
 		dadosCadastrais: {

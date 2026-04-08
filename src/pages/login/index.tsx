@@ -30,8 +30,8 @@ export function LoginPage() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			email: '',
-			password: '',
+			email: 'douglasdduarte@outlook.com',
+			password: '@Sabia123',
 		},
 	})
 
@@ -123,7 +123,7 @@ export function LoginPage() {
 									)}
 								/>
 
-								<Button className='w-full' type='submit' disabled={isLoading}>
+								<Button className='w-full' disabled={isLoading}>
 									Entrar
 								</Button>
 

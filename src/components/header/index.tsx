@@ -40,6 +40,7 @@ export function Header() {
 				)}
 
 				<Button
+					type='button'
 					variant={isMobile ? 'outline' : 'ghost'}
 					size={isMobile ? 'icon' : 'default'}
 					disabled={isLoading}

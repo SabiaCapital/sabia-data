@@ -37,6 +37,7 @@ type PaginationButtonProps = {
 function PaginationButton({ className, isActive, size = 'icon', ...props }: PaginationButtonProps) {
 	return (
 		<Button
+			type='button'
 			aria-current={isActive ? 'page' : undefined}
 			data-slot='pagination-button'
 			data-active={isActive}

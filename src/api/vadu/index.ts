@@ -1,6 +1,6 @@
 import axios from 'axios'
 /* import { VADU_TOKEN_STORAGE_KEY } from '@/constants/storage' */
-import { UNAUTHORIZED_EVENT } from '@/constants/events'
+import { dispatchUnauthorized } from '@/lib/events'
 
 export const api = axios.create({
 	baseURL: import.meta.env.VITE_VADU_API_URL,
@@ -18,9 +18,13 @@ export const api = axios.create({
 
 api.interceptors.response.use(
 	(response) => response,
-	async (error) => {
-		if (error.response?.status === 401) {
-			window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
+	(error) => {
+		const isCancelled = error.code === 'ERR_CANCELED'
+		const isUnauthorized = error.response?.status === 401
+		const isNetworkOrCors = !error.response && !isCancelled
+
+		if (isUnauthorized || isNetworkOrCors) {
+			dispatchUnauthorized()
 		}
 
 		return Promise.reject(error)
@@ -34,7 +38,6 @@ export async function getToken() {
 		},
 	})
 
-	console.log(response)
 	return response.data.token
 }
 

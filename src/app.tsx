@@ -1,4 +1,4 @@
-import type { JSX } from 'react'
+import { type ComponentType, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router'
 import {
 	LOGIN_PATH,
@@ -7,21 +7,28 @@ import {
 	OPERATION_PATH,
 	CNPJ_SEARCH_PATH,
 } from '@/constants/paths'
-import { LoginPage } from '@/pages/login'
-import { MainPage } from '@/pages/main'
-import { OperationsPage } from '@/pages/operations'
-import { OperationPage } from '@/pages/operation'
-import { CnpjSearchPage } from '@/pages/cnpj-search'
 import { Toaster } from '@/components/ui/sonner'
 import { Router } from '@/components/router'
 
-type Route = {
+const LoginPage = lazy(() => import('@/pages/login').then((m) => ({ default: m.LoginPage })))
+const MainPage = lazy(() => import('@/pages/main').then((m) => ({ default: m.MainPage })))
+const OperationsPage = lazy(() =>
+	import('@/pages/operations').then((m) => ({ default: m.OperationsPage }))
+)
+const OperationPage = lazy(() =>
+	import('@/pages/operation').then((m) => ({ default: m.OperationPage }))
+)
+const CnpjSearchPage = lazy(() =>
+	import('@/pages/cnpj-search').then((m) => ({ default: m.CnpjSearchPage }))
+)
+
+type RouteConfig = {
 	path: string
-	element: () => JSX.Element
+	element: ComponentType
 	isAuth?: boolean
 }
 
-const routes: Route[] = [
+const routes: RouteConfig[] = [
 	{
 		path: LOGIN_PATH,
 		element: LoginPage,
@@ -48,21 +55,23 @@ const routes: Route[] = [
 export function App() {
 	return (
 		<div className='min-h-screen w-full'>
-			<Routes>
-				{routes.map(({ path, element: Page, isAuth }) => (
-					<Route
-						key={path}
-						path={path}
-						element={
-							<Router isAuthRoute={isAuth}>
-								<Page />
-							</Router>
-						}
-					/>
-				))}
+			<Suspense>
+				<Routes>
+					{routes.map(({ path, element: Page, isAuth }) => (
+						<Route
+							key={path}
+							path={path}
+							element={
+								<Router isAuthRoute={isAuth}>
+									<Page />
+								</Router>
+							}
+						/>
+					))}
 
-				<Route path='*' element={<Navigate to={MAIN_PATH} replace />} />
-			</Routes>
+					<Route path='*' element={<Navigate to={MAIN_PATH} replace />} />
+				</Routes>
+			</Suspense>
 
 			<Toaster position='top-center' richColors />
 		</div>

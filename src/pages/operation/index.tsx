@@ -8,6 +8,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { MAIN_PATH } from '@/constants/paths'
 import { formatCurrency, formatPercentage } from '@/utils/number'
 import { formatCnpj, isCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
+import { getLastSocietaryChange } from '@/utils/data'
 import { getOperation, getOperationDebtors, getOperationExtra, getClient } from '@/api/black'
 import { getCreditHub } from '@/api/credit-hub'
 import { getMantyz } from '@/api/mantyz'
@@ -32,7 +33,7 @@ import {
 	BreadcrumbEllipsis,
 } from '@/components/ui/breadcrumb'
 import { DataTable } from '@/components/data-table'
-import { DEBTORS_PAGE_SIZE, getLastSocietaryChange } from './helpers'
+import { DEBTORS_PAGE_SIZE } from './helpers'
 
 export function OperationPage() {
 	const [page, setPage] = useState(1)

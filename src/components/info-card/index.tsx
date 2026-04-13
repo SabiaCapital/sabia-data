@@ -40,7 +40,7 @@ export function InfoCard({
 				</CardAction>
 			</CardHeader>
 
-			<CardContent className='flex flex-col gap-1'>
+			<CardContent className='flex flex-col gap-2'>
 				{isLoading ? (
 					<>
 						{Array.from({ length: skeletonCount }).map((_, i) => (
@@ -55,8 +55,11 @@ export function InfoCard({
 				) : (
 					<>
 						{items.map(({ label, value }) => (
-							<span key={label} className='text-sm'>
-								{label}: {value}
+							<span key={label} className='text-muted-foreground text-sm'>
+								<span key={label} className='text-foreground font-medium'>
+									{label}:{' '}
+								</span>
+								{value}
 							</span>
 						))}
 					</>

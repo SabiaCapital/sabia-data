@@ -1,10 +1,104 @@
+type QueryInfo = {
+	id_template: number
+	id_consulta_bigdata: number
+	tipoConsulta: number
+	data: string
+}
+
+type BouncedCheck = {
+	id_detalhe_cheque: number
+	inclusao: string
+	u_inclusao: number
+	alteracao: string | null
+	u_alteracao: number | null
+	id_controle_consulta: number
+	cheque: string
+	alinea: string
+	quantidade: number
+	valor: number | null
+	banco: string
+	agencia: string
+	data: string
+	cinco_mais_recentes: boolean
+}
+
+type Template = {
+	id_template: number
+	nome: string
+	fontes: number[]
+	datasets: {
+		id_fonte_externa: number
+		nome: string
+	}[]
+}
+
+type SourceResponse = {
+	id_fonte_externa: number
+	retorno: string
+}
+
+type MonthlyPayment = {
+	mes: number
+	ano: number
+	valor: string
+	descricao: string
+}
+
+type MonthlyQty = {
+	ano: number
+	mes: number
+	qtd: string
+}
+
+type MonthlyValue = {
+	ano: number
+	mes: number
+	valor: string
+}
+
+type MonthlyQtyValue = {
+	ano: number
+	mes: number
+	qtd: string
+	valor: string
+}
+
+type MonthlyQtyValueParty = {
+	ano: number
+	mes: number
+	qtd: string
+	valor: string
+	polo: string | null
+}
+
+type LegalAction = {
+	id_processo: string | null
+	numero_processo_unico: string | null
+	area: string | null
+	valor: number | null
+	data_processamento: string | null
+	tribunal: string | null
+	relator: string | null
+	uf: string | null
+	segmento: string | null
+	data_distribuicao: string | null
+	data_autuacao: string | null
+	orgao_julgador: string | null
+	status_observacao: string | null
+	polo: string | null
+	status: string | null
+	tipo: string | null
+	data: string
+	natureza: string | null
+	aval: boolean
+	dist: string | null
+	vara: string | null
+	cidade: string | null
+	cinco_mais_recentes: boolean
+}
+
 type CPF = {
-	consulta_realizada: {
-		id_template: number
-		id_consulta_bigdata: number
-		tipoConsulta: number
-		data: string
-	}
+	consulta_realizada: QueryInfo
 	identificacao: {
 		dados_gerais: {
 			id_entidade: number
@@ -72,7 +166,7 @@ type CPF = {
 		}
 		protestos: any[]
 		dividas_vencidas: any[]
-		cheques_sem_fundo: any[]
+		cheques_sem_fundo: BouncedCheck[]
 		pefin: any[]
 		refin: any[]
 		acao_judicial: any[]
@@ -80,35 +174,19 @@ type CPF = {
 		cenprot: any | null
 	}
 	evolucoes: {
-		evolucao_protesto: { dados: any | null }
-		evolucao_cheque_sem_fundo: { dados: any | null }
-		evolucao_pefin: { dados: any | null }
-		evolucao_refin: { dados: any | null }
+		evolucao_protesto: { dados: MonthlyQtyValue[] | null }
+		evolucao_cheque_sem_fundo: { dados: MonthlyQty[] | null }
+		evolucao_pefin: { dados: MonthlyQtyValue[] | null }
+		evolucao_refin: { dados: MonthlyQtyValue[] | null }
 	}
 	bmp: any | null
-	template: {
-		id_template: number
-		nome: string
-		fontes: number[]
-		datasets: {
-			id_fonte_externa: number
-			nome: string
-		}[]
-	}
+	template: Template
 	erros_fonte: any[]
-	retorno_fontes: {
-		id_fonte_externa: number
-		retorno: string
-	}[]
+	retorno_fontes: SourceResponse[]
 }
 
 type CNPJ = {
-	consulta_realizada: {
-		id_template: number
-		id_consulta_bigdata: number
-		tipoConsulta: number
-		data: string
-	}
+	consulta_realizada: QueryInfo
 	identificacao: {
 		dados_gerais: {
 			id_entidade: number
@@ -323,12 +401,12 @@ type CNPJ = {
 			valor_total: number | null
 			valor_do_primeiro: number | null
 			valor_do_maior: number | null
-			acoes_judiciais: any[]
-			acoes_trabalhistas: any[]
+			acoes_judiciais: LegalAction[]
+			acoes_trabalhistas: LegalAction[]
 			outras_ocorrencias: any[]
 		}
 		dividas_vencidas: any[]
-		cheques_sem_fundo: any[]
+		cheques_sem_fundo: BouncedCheck[]
 		pefin: any[]
 		refin: any[]
 		cndt: {
@@ -368,90 +446,31 @@ type CNPJ = {
 		cenprot: any | null
 	}
 	evolucoes: {
-		evolucao_capital_social: {
-			dados: {
-				ano: number
-				mes: number
-				valor: string
-			}[]
-		}
+		evolucao_capital_social: { dados: MonthlyValue[] | null }
 		evolucao_entrada_saida_socios: {
-			entrada: {
-				ano: number
-				mes: number
-				qtd: string
-			}[]
-			saida: {
-				ano: number
-				mes: number
-				qtd: string
-			}[]
+			entrada: MonthlyQty[] | null
+			saida: MonthlyQty[] | null
 		}
-		evolucao_protesto: { dados: any | null }
-		evolucao_cheque_sem_fundo: { dados: any | null }
-		evolucao_pefin: {
-			dados: {
-				ano: number
-				mes: number
-				qtd: string
-				valor: string
-			}[]
-		}
-		evolucao_refin: { dados: any | null }
+		evolucao_protesto: { dados: MonthlyQtyValue[] | null }
+		evolucao_cheque_sem_fundo: { dados: MonthlyQty[] | null }
+		evolucao_pefin: { dados: MonthlyQtyValue[] | null }
+		evolucao_refin: { dados: MonthlyQtyValue[] | null }
 		evolucao_acoes_judiciais: {
-			dados: {
-				ano: number
-				mes: number
-				qtd: string
-				valor: string
-				polo: string
-			}[]
+			dados: MonthlyQtyValueParty[] | null
 		}
-		evolucao_acoes_trabalhistas: { dados: any | null }
-		evolucao_historico_consulta: {
-			dados: {
-				ano: number
-				mes: number
-				qtd: string
-			}[]
-		}
+		evolucao_acoes_trabalhistas: { dados: MonthlyQtyValueParty[] | null }
+		evolucao_historico_consulta: { dados: MonthlyQty[] | null }
 		evolucao_historico_pagamento: {
-			mercado: {
-				mes: number
-				ano: number
-				valor: string
-				descricao: string
-			}[]
-			cedente: any | null
-			factoring: {
-				mes: number
-				ano: number
-				valor: string
-				descricao: string
-			}[]
-			pagamento: {
-				mes: number
-				ano: number
-				valor: string
-				descricao: string
-			}[]
+			mercado: MonthlyPayment[] | null
+			cedente: MonthlyPayment[] | null
+			factoring: MonthlyPayment[] | null
+			pagamento: MonthlyPayment[] | null
 		}
 	}
 	bmp: any | null
-	template: {
-		id_template: number
-		nome: string
-		fontes: number[]
-		datasets: {
-			id_fonte_externa: number
-			nome: string
-		}[]
-	}
+	template: Template
 	erros_fonte: any[]
-	retorno_fontes: {
-		id_fonte_externa: number
-		retorno: string
-	}[]
+	retorno_fontes: SourceResponse[]
 }
 
 export type GetMantyzResponse = {

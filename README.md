@@ -1,5 +1,7 @@
 # TODO
 
+- [ ] Exportar resumo da pesquisa por CNPJ em PDF
+- [ ] Tratar cenário de response da pesquisa por CNPJ ser referente a um CPF
 - [ ] Refatorar paginação da DataTable
 - [ ] Criar objeto classNames para a DataTable, que recebe dentro classes para todos os principais componentes
 - [ ] Retirar prop render da DataTable para passar diretamente um ReactNode para a row

@@ -1,3 +1,16 @@
+export function onlyNumbers(value: string) {
+	return value.replace(/\D/g, '')
+}
+
+export function cnpjMask(value: string) {
+	return onlyNumbers(value)
+		.slice(0, 14)
+		.replace(/^(\d{2})(\d)/, '$1.$2')
+		.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+		.replace(/\.(\d{3})(\d)/, '.$1/$2')
+		.replace(/(\d{4})(\d)/, '$1-$2')
+}
+
 export function formatCnpj(cnpj?: string, { unmask = false }: { unmask?: boolean } = {}) {
 	if (cnpj === undefined || cnpj === null) return ''
 
@@ -6,6 +19,16 @@ export function formatCnpj(cnpj?: string, { unmask = false }: { unmask?: boolean
 	if (unmask) return digits
 
 	return digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
+}
+
+export function formatCpf(cpf?: string, { unmask = false }: { unmask?: boolean } = {}) {
+	if (cpf === undefined || cpf === null) return ''
+
+	const digits = cpf.replace(/[^\d]+/g, '')
+
+	if (unmask) return digits
+
+	return digits.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
 }
 
 export function isCnpj(value?: string) {

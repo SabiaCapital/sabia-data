@@ -123,7 +123,7 @@ export function LoginPage() {
 									)}
 								/>
 
-								<Button className='w-full' type='submit' disabled={isLoading}>
+								<Button className='w-full' disabled={isLoading}>
 									Entrar
 								</Button>
 

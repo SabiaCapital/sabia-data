@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { BLACK_TOKEN_STORAGE_KEY } from '@/constants/storage'
-import { UNAUTHORIZED_EVENT } from '@/constants/events'
+import { dispatchUnauthorized } from '@/lib/events'
 import type {
 	GetOperationsParams,
 	GetOperationDebtorsParams,
@@ -29,9 +29,13 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
 	(response) => response,
-	async (error) => {
-		if (error.response?.status === 401) {
-			window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
+	(error) => {
+		const isCancelled = error.code === 'ERR_CANCELED'
+		const isUnauthorized = error.response?.status === 401
+		const isNetworkOrCors = !error.response && !isCancelled
+
+		if (isUnauthorized || isNetworkOrCors) {
+			dispatchUnauthorized()
 		}
 
 		return Promise.reject(error)

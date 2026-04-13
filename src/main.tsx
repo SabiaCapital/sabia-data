@@ -7,6 +7,7 @@ import { THEME_STORAGE_KEY, USER_STORAGE_KEY } from './constants/storage'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { UserProvider } from '@/providers/user-provider'
 import { App } from './app'
+import '@/lib/dayjs'
 import './main.css'
 
 createRoot(document.getElementById('root')!).render(

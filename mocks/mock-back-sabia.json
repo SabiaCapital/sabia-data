@@ -1,7 +1,7 @@
 {
   "uuid": "b9e8c58b-3b62-42ba-b44f-f2ca7f530f5a",
   "lastMigration": 33,
-  "name": "back-sabia.blackarrowcapital.com.br/integra",
+  "name": "api-sabia.black101.com.br/integra",
   "endpointPrefix": "",
   "latency": 0,
   "port": 3001,

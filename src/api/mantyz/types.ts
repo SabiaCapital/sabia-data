@@ -519,7 +519,7 @@ type GeralEnderecoPrincipal = {
 	complemento: string | null
 }
 
-export type GetMantyzGeralResponse = {
+export type GetMantyzCreditResponse = {
 	content: {
 		identificacao: {
 			dados_gerais: GeralDadosGerais

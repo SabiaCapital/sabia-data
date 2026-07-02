@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { MANTYZ_TOKEN_STORAGE_KEY } from '@/constants/storage'
 import { dispatchUnauthorized } from '@/lib/events'
-import type { GetMantyzResponse, GetMantyzGeralResponse } from './types'
+import type { GetMantyzResponse, GetMantyzCreditResponse } from './types'
 
 export const api = axios.create({
 	baseURL: import.meta.env.VITE_MANTYZ_API_URL,
@@ -53,7 +53,7 @@ export async function getMantyz(cnpj: string) {
 	return response.data.content
 }
 
-export async function getMantyzGeral(cnpj: string): Promise<GetMantyzGeralResponse['content']> {
+export async function getMantyzGeral(cnpj: string): Promise<GetMantyzCreditResponse['content']> {
 	const now = new Date()
 	const months: { ano: number; mes: number }[] = []
 
@@ -78,7 +78,7 @@ export async function getMantyzGeral(cnpj: string): Promise<GetMantyzGeralRespon
 
 	if (!analysisId) return null
 
-	const resp = await api.post<GetMantyzGeralResponse>(
+	const resp = await api.post<GetMantyzCreditResponse>(
 		'integracaomotor/portal/api/consulta/geral',
 		{ id_analise_credito: analysisId }
 	)

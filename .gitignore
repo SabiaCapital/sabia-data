@@ -23,7 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 
-# Local research/temp files
-geral-resposta.json
-manual_mantyz.txt
-Manual API Mantyz v1.0.docx

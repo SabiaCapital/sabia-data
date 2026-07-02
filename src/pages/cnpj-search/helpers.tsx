@@ -1,13 +1,13 @@
 import dayjs from 'dayjs'
 import { formatCurrency } from '@/utils/number'
 import { formatCnpj, formatCpf, isCnpj } from '@/utils/text'
-import type { GetMantyzResponse, GetMantyzGeralResponse } from '@/api/mantyz/types'
+import type { GetMantyzResponse, GetMantyzCreditResponse } from '@/api/mantyz/types'
 import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
 
 export function getCompanyItems(
 	mantyzData?: GetMantyzResponse['content'],
-	geralData?: GetMantyzGeralResponse['content']
+	geralData?: GetMantyzCreditResponse['content']
 ): InfoCardItem[] {
 	// Prefer geral data (more complete) for identification fields, fall back to PesquisaDocumento
 	const geralDg = geralData?.identificacao?.dados_gerais

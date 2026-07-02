@@ -1,14 +1,23 @@
 import dayjs from 'dayjs'
 import { formatCurrency } from '@/utils/number'
 import { formatCnpj, formatCpf, isCnpj } from '@/utils/text'
-import type { GetMantyzResponse } from '@/api/mantyz/types'
+import type { GetMantyzResponse, GetMantyzGeralResponse } from '@/api/mantyz/types'
 import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
 
-export function getCompanyItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
-	const company = data?.pessoa_juridica
-	const dadosGerais = company?.identificacao.dados_gerais
-	const addressData = company?.identificacao.dados_localizacao_contato.endereco_principal
+export function getCompanyItems(
+	mantyzData?: GetMantyzResponse['content'],
+	geralData?: GetMantyzGeralResponse['content']
+): InfoCardItem[] {
+	// Prefer geral data (more complete) for identification fields, fall back to PesquisaDocumento
+	const geralDg = geralData?.identificacao?.dados_gerais
+	const mantyzDg = mantyzData?.pessoa_juridica?.identificacao.dados_gerais
+
+	const dadosGerais = geralDg ?? mantyzDg
+
+	const geralAddr = geralData?.identificacao?.dados_localizacao_contato?.endereco_principal
+	const mantyzAddr = mantyzData?.pessoa_juridica?.identificacao.dados_localizacao_contato.endereco_principal
+	const addressData = geralAddr ?? mantyzAddr
 
 	const address = addressData
 		? [
@@ -23,21 +32,35 @@ export function getCompanyItems(data?: GetMantyzResponse['content']): InfoCardIt
 				.toUpperCase()
 		: '-'
 
-	const filteredCnaes = dadosGerais?.cnaes_secundarios?.filter((c) => c.id_cnae)
+	// cnae_principal and cnaes_secundarios come from geral when available
+	const cnaePrincipal = geralDg?.cnae_principal ?? null
+	const filteredCnaes = (geralDg?.cnaes_secundarios ?? []).filter((c) => c.id_cnae)
+
+	// nome_fantasia from historico_cadastral (geral only)
+	const historicoCadastral = geralDg?.historico_cadastral
+	const nomeFantasia =
+		historicoCadastral?.lista_historico_nome?.find((h) => h.nome_fantasia)?.nome_fantasia || '-'
+
+	const fundacaoFormatted = (() => {
+		if (!dadosGerais?.fundacao) return '-'
+		const d = dayjs(dadosGerais.fundacao)
+		return d.isValid() ? d.format('DD/MM/YYYY') : dadosGerais.fundacao
+	})()
 
 	return [
 		{ label: 'Razão social', value: dadosGerais?.nome || '-' },
+		{ label: 'Nome fantasia', value: nomeFantasia },
 		{ label: 'CNPJ', value: formatCnpj(dadosGerais?.cnpj_cpf) || '-' },
-		{ label: 'Fundação', value: dadosGerais?.fundacao || '-' },
+		{ label: 'Fundação', value: fundacaoFormatted },
 		{ label: 'Capital social', value: formatCurrency(dadosGerais?.capital_social) || '-' },
 		{ label: 'Endereço', value: address },
 		{
 			label: 'CNAE',
-			value: dadosGerais?.cnae_principal ? (
+			value: cnaePrincipal ? (
 				<span>
-					{`${dadosGerais.cnae_principal.id_cnae} - ${dadosGerais.cnae_principal.descricao_cnae} `}
+					{`${cnaePrincipal.id_cnae} - ${cnaePrincipal.descricao_cnae} `}
 
-					{filteredCnaes?.length ? (
+					{filteredCnaes.length ? (
 						<ListDrawer
 							title='CNAEs secundárias'
 							triggerLabel={`Ver ${filteredCnaes.length} ${filteredCnaes.length === 1 ? 'CNAE secundária' : 'CNAEs secundárias'}`}

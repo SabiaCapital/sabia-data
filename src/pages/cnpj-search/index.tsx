@@ -10,7 +10,7 @@ import {
 	AlertCircleIcon,
 } from 'lucide-react'
 import { isCnpj, cnpjMask, onlyNumbers } from '@/utils/text'
-import { getMantyz } from '@/api/mantyz'
+import { getMantyz, getMantyzGeral } from '@/api/mantyz'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,10 +46,16 @@ export function CnpjSearchPage() {
 		enabled: !!searchedCnpj,
 	})
 
+	const geralQuery = useQuery({
+		queryKey: ['mantyzGeral', searchedCnpj],
+		queryFn: () => getMantyzGeral(searchedCnpj!),
+		enabled: !!searchedCnpj,
+	})
+
 	const isCnpjInvalid =
 		mantyzQuery.isError && (mantyzQuery.error as any)?.response?.status === 412
 
-	const isLoading = mantyzQuery.isFetching
+	const isLoading = mantyzQuery.isFetching || geralQuery.isFetching
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -167,8 +173,8 @@ export function CnpjSearchPage() {
 							description='Sobre'
 							title='Empresa'
 							icon={<TrendingUp />}
-							items={getCompanyItems(mantyzQuery.data)}
-							isLoading={mantyzQuery.isFetching}
+							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}
+							isLoading={mantyzQuery.isFetching || geralQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={7}
 						/>

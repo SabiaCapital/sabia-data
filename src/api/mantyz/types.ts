@@ -479,3 +479,53 @@ export type GetMantyzResponse = {
 		pessoa_juridica?: CNPJ
 	}
 }
+
+type GeralDadosGerais = {
+	id_entidade: number
+	nome: string
+	cnpj_cpf: string
+	fundacao: string
+	capital_social: number
+	cnae_principal: {
+		id_cnae: string
+		descricao_cnae: string
+	} | null
+	cnaes_secundarios: {
+		id_cnae: string
+		descricao_cnae: string
+	}[]
+	historico_cadastral: {
+		lista_historico_nome: {
+			nome: string
+			nome_fantasia: string
+			nome_oficial: string
+			data_alteracao: string
+		}[]
+		lista_historico_cnae: {
+			codigo: number
+			atividade: string
+			atividade_principal: boolean
+			data_alteracao: string
+		}[]
+	} | null
+}
+
+type GeralEnderecoPrincipal = {
+	logradouro: string
+	numero: string
+	bairro: string
+	municipio: string
+	uf: string
+	complemento: string | null
+}
+
+export type GetMantyzGeralResponse = {
+	content: {
+		identificacao: {
+			dados_gerais: GeralDadosGerais
+			dados_localizacao_contato: {
+				endereco_principal: GeralEnderecoPrincipal
+			}
+		}
+	} | null
+}

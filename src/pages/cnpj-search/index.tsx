@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
-	AlertCircleIcon,
 	BracesIcon,
 	Search,
 	TextSearchIcon,
 	TrendingUp,
 	WindIcon,
+	AlertCircleIcon,
 } from 'lucide-react'
 import { isCnpj, cnpjMask, onlyNumbers } from '@/utils/text'
-import { getCreditHub } from '@/api/credit-hub'
-import { getMantyz } from '@/api/mantyz'
+import { getMantyz, getMantyzGeral } from '@/api/mantyz'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,11 +21,11 @@ import {
 	EmptyMedia,
 	EmptyTitle,
 } from '@/components/ui/empty'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { InfoCard } from '@/components/info-card'
-import { getCompanyItems, getCreditHubItems, getMantyzItems } from './helpers'
+import { getCompanyItems, getMantyzItems } from './helpers'
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
@@ -41,32 +40,22 @@ export function CnpjSearchPage() {
 		setSearchedCnpj(search)
 	}
 
-	const creditHubQuery = useQuery({
-		queryKey: ['creditHub', searchedCnpj],
-		queryFn: ({ signal }) => getCreditHub(searchedCnpj!, signal),
-		enabled: !!searchedCnpj,
-	})
-
 	const mantyzQuery = useQuery({
 		queryKey: ['mantyz', searchedCnpj],
 		queryFn: () => getMantyz(searchedCnpj!),
 		enabled: !!searchedCnpj,
 	})
 
-	const queryClient = useQueryClient()
+	const geralQuery = useQuery({
+		queryKey: ['mantyzGeral', searchedCnpj],
+		queryFn: () => getMantyzGeral(searchedCnpj!),
+		enabled: !!searchedCnpj,
+	})
 
 	const isCnpjInvalid =
 		mantyzQuery.isError && (mantyzQuery.error as any)?.response?.status === 412
 
-	useEffect(() => {
-		if (isCnpjInvalid) {
-			queryClient.cancelQueries({
-				queryKey: ['creditHub'],
-			})
-		}
-	}, [mantyzQuery.isError, mantyzQuery.error, queryClient, isCnpjInvalid])
-
-	const isLoading = creditHubQuery.isFetching || mantyzQuery.isFetching
+	const isLoading = mantyzQuery.isFetching || geralQuery.isFetching
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -184,23 +173,14 @@ export function CnpjSearchPage() {
 							description='Sobre'
 							title='Empresa'
 							icon={<TrendingUp />}
-							items={getCompanyItems(creditHubQuery.data)}
-							isLoading={creditHubQuery.isFetching}
-							isError={creditHubQuery.isError}
+							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}
+							isLoading={mantyzQuery.isFetching || geralQuery.isFetching}
+							isError={mantyzQuery.isError}
 							skeletonCount={7}
 						/>
 
 						<InfoCard
-							description='Credit HUB'
-							title='Credit HUB'
-							icon={<BracesIcon />}
-							items={getCreditHubItems(creditHubQuery.data)}
-							isLoading={creditHubQuery.isFetching}
-							isError={creditHubQuery.isError}
-							skeletonCount={9}
-						/>
-
-						<InfoCard
+							className='col-span-2'
 							description='Mantyz'
 							title='Mantyz'
 							icon={<BracesIcon />}

@@ -1,18 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
-import { Info } from 'lucide-react'
 import dayjs from 'dayjs'
 import { toast } from 'sonner'
 import { TrendingUp, User } from 'lucide-react'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { MAIN_PATH } from '@/constants/paths'
 import { formatCurrency, formatPercentage } from '@/utils/number'
-import { formatCnpj, isCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
-import { getLastSocietaryChange } from '@/utils/data'
+import { formatCnpj, getStatusLabel, getModalityLabel } from '@/utils/text'
 import { getOperation, getOperationDebtors, getOperationExtra, getClient } from '@/api/black'
-import { getCreditHub } from '@/api/credit-hub'
 import { getMantyz } from '@/api/mantyz'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
@@ -87,16 +83,6 @@ export function OperationPage() {
 
 	const debtorsCnpjs = debtors?.items.map((d) => formatCnpj(d.sacadoCnpj, { unmask: true })) || []
 
-	const creditHubQueries = useQueries({
-		queries: debtorsCnpjs.map((cnpj) => ({
-			queryKey: ['creditHub', cnpj],
-			queryFn: () => getCreditHub(cnpj),
-			enabled: !!cnpj,
-		})),
-	})
-	const isFetchingCreditHub = creditHubQueries.some((q) => q.isFetching)
-	const creditHubHasError = creditHubQueries.some((q) => q.isError)
-
 	const mantyzQueries = useQueries({
 		queries: debtorsCnpjs.map((cnpj) => ({
 			queryKey: ['mantyz', cnpj],
@@ -112,14 +98,12 @@ export function OperationPage() {
 		isFetchingOperationExtra ||
 		isFetchingClient ||
 		isFetchingDebtors ||
-		isFetchingCreditHub ||
 		isFetchingMantyz
 
 	const hasPartialError =
 		operationExtraHasError ||
 		clientHasError ||
 		debtorsHasError ||
-		creditHubHasError ||
 		mantyzHasError
 
 	useEffect(() => {
@@ -409,101 +393,6 @@ export function OperationPage() {
 						),
 					},
 					{
-						key: 'analise',
-						header: (
-							<Tooltip>
-								<TooltipTrigger asChild className='w-max'>
-									<div className='flex items-center gap-2'>
-										<span>Credit HUB</span>
-										<Info size={16} />
-									</div>
-								</TooltipTrigger>
-
-								<TooltipContent className='w-52'>
-									<p>
-										As informações da Credit HUB levam em torno de 5 minutos
-										para ficarem disponíveis na primeira vez que um sacado é
-										consultado.
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						),
-						render: (_, rowIndex) => {
-							const { data: creditHub } = creditHubQueries[rowIndex]
-
-							const isEnterprise = isCnpj(
-								creditHub?.refin?.dadosCadastrais[0].CpfCnpj
-							)
-
-							return (
-								<div className='flex flex-col gap-1'>
-									<span>
-										{isEnterprise ? 'Data de fundação:' : 'Data de nascimento:'}{' '}
-										{creditHub?.refin?.dadosCadastrais[0].NascimentoFundacao ??
-											'Consultando...'}
-									</span>
-
-									<span>
-										Quantidade PEFIN:{' '}
-										{creditHub?.pefin?.informacoes[0]
-											.totalPendenciasFinanceiras ?? 'Consultando...'}
-									</span>
-
-									<span>
-										Valor PEFIN:{' '}
-										{formatCurrency(
-											creditHub?.pefin?.informacoes[0]
-												.valorTotalPendenciasFinanceiras
-										) ?? 'Consultando...'}
-									</span>
-
-									<span>
-										Quantidade REFIN:{' '}
-										{creditHub?.refin?.spc
-											.flat()
-											.filter((item) => Object.keys(item).length > 0)
-											.length ?? 'Consultando...'}
-									</span>
-
-									<span>
-										Valor REFIN:{' '}
-										{formatCurrency(
-											creditHub?.refin?.spc
-												.flat()
-												.reduce(
-													(acc, item) =>
-														acc + parseFloat(item.Valor || '0'),
-													0
-												)
-										) ?? 'Consultando...'}
-									</span>
-
-									{isEnterprise && (
-										<span>
-											Capital social:{' '}
-											{formatCurrency(creditHub?.capitalSocial) ??
-												'Consultando...'}
-										</span>
-									)}
-
-									<span>
-										Valor total dívidas:{' '}
-										{formatCurrency(creditHub?.valor_total_dividas) ??
-											'Consultando...'}
-									</span>
-
-									{isEnterprise && (
-										<span>
-											Última alteração societária:{' '}
-											{getLastSocietaryChange(creditHub?.quadroSocietario) ??
-												'Consultando...'}
-										</span>
-									)}
-								</div>
-							)
-						},
-					},
-					{
 						key: 'porcentagemOperacao',
 						header: 'Mantyz',
 						render: (_, rowIndex) => {
@@ -559,7 +448,7 @@ export function OperationPage() {
 						},
 					},
 				]}
-				isLoading={isFetchingDebtors || isFetchingCreditHub || isFetchingMantyz}
+				isLoading={isFetchingDebtors || isFetchingMantyz}
 				isError={debtorsHasError}
 				pagination={{
 					page,

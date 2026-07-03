@@ -1,215 +1,77 @@
 import dayjs from 'dayjs'
 import { formatCurrency } from '@/utils/number'
 import { formatCnpj, formatCpf, isCnpj } from '@/utils/text'
-import type { GetCreditHubResponse } from '@/api/credit-hub/types'
-import type { GetMantyzResponse } from '@/api/mantyz/types'
+import type { GetMantyzResponse, GetMantyzCreditResponse } from '@/api/mantyz/types'
 import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
 
-export function getCompanyItems(data?: GetCreditHubResponse['data']): InfoCardItem[] {
-	const mainAdress = data?.enderecos?.[0]
-	const adress = mainAdress
+export function getCompanyItems(
+	mantyzData?: GetMantyzResponse['content'],
+	geralData?: GetMantyzCreditResponse['content']
+): InfoCardItem[] {
+	// Prefer geral data (more complete) for identification fields, fall back to PesquisaDocumento
+	const geralDg = geralData?.identificacao?.dados_gerais
+	const mantyzDg = mantyzData?.pessoa_juridica?.identificacao.dados_gerais
+
+	const dadosGerais = geralDg ?? mantyzDg
+
+	const geralAddr = geralData?.identificacao?.dados_localizacao_contato?.endereco_principal
+	const mantyzAddr = mantyzData?.pessoa_juridica?.identificacao.dados_localizacao_contato.endereco_principal
+	const addressData = geralAddr ?? mantyzAddr
+
+	const address = addressData
 		? [
-				mainAdress.logradouro,
-				mainAdress.numero,
-				mainAdress.bairro,
-				mainAdress.cidade,
-				mainAdress.uf,
+				addressData.logradouro,
+				addressData.numero,
+				addressData.bairro,
+				addressData.municipio,
+				addressData.uf,
 			]
 				.filter(Boolean)
 				.join(', ')
 				.toUpperCase()
 		: '-'
 
-	const filteredCnaes = data?.cnaesSecundarios?.filter((c) => c.cnae)
+	// cnae_principal and cnaes_secundarios come from geral when available
+	const cnaePrincipal = geralDg?.cnae_principal ?? null
+	const filteredCnaes = (geralDg?.cnaes_secundarios ?? []).filter((c) => c.id_cnae)
+
+	// nome_fantasia from historico_cadastral (geral only)
+	const historicoCadastral = geralDg?.historico_cadastral
+	const nomeFantasia =
+		historicoCadastral?.lista_historico_nome?.find((h) => h.nome_fantasia)?.nome_fantasia || '-'
+
+	const fundacaoFormatted = (() => {
+		if (!dadosGerais?.fundacao) return '-'
+		const d = dayjs(dadosGerais.fundacao)
+		return d.isValid() ? d.format('DD/MM/YYYY') : dadosGerais.fundacao
+	})()
 
 	return [
-		{ label: 'Razão social', value: data?.razaoSocial || '-' },
-		{
-			label: 'Nome fantasia',
-			value: data?.nomeFantasia || data?.refin?.dadosCadastrais[0]?.NomeFantasia || '-',
-		},
-		{ label: 'CNPJ', value: formatCnpj(data?.cnpj) || '-' },
-		{ label: 'Fundação', value: data?.dataAbertura || '-' },
-		{ label: 'Capital social', value: formatCurrency(data?.capitalSocial) || '-' },
-		{ label: 'Endereço', value: adress },
+		{ label: 'Razão social', value: dadosGerais?.nome || '-' },
+		{ label: 'Nome fantasia', value: nomeFantasia },
+		{ label: 'CNPJ', value: formatCnpj(dadosGerais?.cnpj_cpf) || '-' },
+		{ label: 'Fundação', value: fundacaoFormatted },
+		{ label: 'Capital social', value: formatCurrency(dadosGerais?.capital_social) || '-' },
+		{ label: 'Endereço', value: address },
 		{
 			label: 'CNAE',
-			value: data?.cnae ? (
+			value: cnaePrincipal ? (
 				<span>
-					{`${data.cnae} - ${data.cnaeDescricao} `}
+					{`${cnaePrincipal.id_cnae} - ${cnaePrincipal.descricao_cnae} `}
 
-					{filteredCnaes?.length ? (
+					{filteredCnaes.length ? (
 						<ListDrawer
 							title='CNAEs secundárias'
 							triggerLabel={`Ver ${filteredCnaes.length} ${filteredCnaes.length === 1 ? 'CNAE secundária' : 'CNAEs secundárias'}`}
 							data={filteredCnaes}
 							columns={[
-								{ header: 'Código', render: (c) => c.cnae || '-' },
-								{ header: 'Descrição', render: (c) => c.descricao || '-' },
+								{ header: 'Código', render: (c) => c.id_cnae || '-' },
+								{ header: 'Descrição', render: (c) => c.descricao_cnae || '-' },
 							]}
 						/>
 					) : null}
 				</span>
-			) : (
-				'-'
-			),
-		},
-	]
-}
-
-export function getCreditHubItems(data?: GetCreditHubResponse['data']): InfoCardItem[] {
-	const pefin = data?.pefin?.informacoes[0]
-	const pefinCount = pefin?.totalPendenciasFinanceiras
-	const pefinValue = pefin?.valorTotalPendenciasFinanceiras
-
-	const refin = data?.refin?.spc
-	const refinCount = refin?.flat().filter((item) => Object.keys(item).length > 0).length
-	const refinValue = refin?.flat().reduce((acc, item) => acc + parseFloat(item.Valor || '0'), 0)
-
-	const protests = pefin?.protestos
-	const protestsCount = protests?.quantidade_ocorrencia
-	const protestsValue = protests?.valor_total
-
-	const debtsCount = data?.quantidade_dividas
-	const debtsValue = data?.valor_total_dividas
-
-	const filteredConsultations = data?.historico_consultas?.filter((c) => c.usuario)
-
-	return [
-		{
-			label: 'PEFIN',
-			value: pefinCount
-				? `${pefinCount} ${pefinCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(pefinValue)}`
-				: '-',
-		},
-		{
-			label: 'REFIN',
-			value: refinCount
-				? `${refinCount} ${refinCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(refinValue)}`
-				: '-',
-		},
-		{
-			label: 'Protestos',
-			value: protestsCount
-				? `${protestsCount} ${protestsCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(protestsValue)}`
-				: '-',
-		},
-		{
-			label: 'PGFN',
-			value: debtsCount
-				? `${debtsCount} ${debtsCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(debtsValue)}`
-				: '-',
-		},
-		{
-			label: 'Cheques sem fundo',
-			value: data?.ccf?.bancos?.length ? (
-				<ListDrawer
-					title='Cheques sem fundo'
-					triggerLabel={`Ver ${data.ccf.bancos.length} ${data.ccf.bancos.length === 1 ? 'registro' : 'registros'}`}
-					data={data.ccf.bancos}
-					columns={[
-						{ header: 'Banco', render: (b) => b.banco || '-' },
-						{ header: 'Agência', render: (b) => b.agencia || '-' },
-						{ header: 'Motivo', render: (b) => b.motivo || '-' },
-						{ header: 'Quantidade', render: (b) => b.qteOcorrencias || '-' },
-						{ header: 'Último', render: (b) => b.ultimo || '-' },
-					]}
-				/>
-			) : (
-				'-'
-			),
-		},
-		{
-			label: 'Processos judiciais',
-			value: data?.processos?.length ? (
-				<ListDrawer
-					title='Processos judiciais'
-					triggerLabel={`Ver ${data.processos.length} ${data.processos.length === 1 ? 'processo' : 'processos'}`}
-					data={data.processos}
-					columns={[
-						{
-							header: 'Número',
-							render: (p) => p.numero_novo || p.numero_antigo || '-',
-						},
-						{ header: 'Classe', render: (p) => p.classe_processual || '-' },
-						{ header: 'Assunto', render: (p) => p.assuntos || '-' },
-						{
-							header: 'Envolvidos',
-							render: (p) =>
-								p.envolvidos_ultima_movimentacao
-									?.map((e) => e.nome)
-									.filter(Boolean)
-									.join(', ') || '-',
-						},
-					]}
-				/>
-			) : (
-				'-'
-			),
-		},
-		{
-			label: 'Quadro societário',
-			value: data?.quadroSocietario?.length ? (
-				<ListDrawer
-					title='Quadro societário'
-					triggerLabel={`Ver ${data.quadroSocietario.length} ${data.quadroSocietario.length === 1 ? 'sócio' : 'sócios'}`}
-					data={data.quadroSocietario}
-					columns={[
-						{ header: 'Nome', render: (s) => s.nome || '-' },
-						{
-							header: 'Documento',
-							render: (s) => {
-								const doc = s.documento
-								return doc ? (isCnpj(doc) ? formatCnpj(doc) : formatCpf(doc)) : '-'
-							},
-						},
-						{ header: 'Qualificação', render: (s) => s.qualificacaoSocio || '-' },
-						{ header: 'Entrada', render: (s) => s.dataEntrada || '-' },
-						{ header: 'Saída', render: (s) => s.dataSaida || '-' },
-					]}
-				/>
-			) : (
-				'-'
-			),
-		},
-		{
-			label: 'Empresas ligadas',
-			value: data?.participacoesEmpresas?.length ? (
-				<ListDrawer
-					title='Empresas ligadas'
-					triggerLabel={`Ver ${data.participacoesEmpresas.length} ${data.participacoesEmpresas.length === 1 ? 'empresa' : 'empresas'}`}
-					data={data.participacoesEmpresas}
-					columns={[
-						{ header: 'Nome', render: (e) => e.nome || '-' },
-						{ header: 'Documento', render: (e) => formatCnpj(e.documento) || '-' },
-						{ header: 'Qualificação', render: (e) => e.qualificacaoSocio || '-' },
-						{ header: 'Entrada', render: (e) => e.dataEntrada || '-' },
-						{ header: 'Saída', render: (e) => e.dataSaida || '-' },
-					]}
-				/>
-			) : (
-				'-'
-			),
-		},
-		{
-			label: 'Consultas',
-			value: filteredConsultations?.length ? (
-				<ListDrawer
-					title='Consultas'
-					triggerLabel={`Ver ${filteredConsultations.length} ${filteredConsultations.length === 1 ? 'registro' : 'registros'}`}
-					data={filteredConsultations}
-					columns={[
-						{ header: 'Usuário', render: (c) => c.usuario || '-' },
-						{
-							header: 'Data',
-							render: (c) => {
-								const date = dayjs(c.ultimaConsulta)
-								return date.isValid() ? date.format('DD/MM/YYYY') : '-'
-							},
-						},
-					]}
-				/>
 			) : (
 				'-'
 			),

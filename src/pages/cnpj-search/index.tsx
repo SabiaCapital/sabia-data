@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
 	BracesIcon,
+	ClipboardList,
 	Search,
 	TextSearchIcon,
 	TrendingUp,
@@ -25,7 +26,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { InfoCard } from '@/components/info-card'
-import { getCompanyItems, getMantyzItems } from './helpers'
+import { getCompanyItems, getCompanyCadastroItems, getMantyzItems } from './helpers'
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
@@ -176,14 +177,17 @@ export function CnpjSearchPage() {
 							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}
 							isLoading={mantyzQuery.isFetching || geralQuery.isFetching}
 							isError={mantyzQuery.isError}
-							skeletonCount={7}
-						/>
+						skeletonCount={15}
+					/>
 
-						<InfoCard
-							className='col-span-2'
-							description='Mantyz'
-							title='Mantyz'
-							icon={<BracesIcon />}
+					<InfoCard
+						className='col-span-2'
+						description='Fiscal e cadastral'
+						title='Dados Cadastrais'
+						icon={<ClipboardList />}
+						items={getCompanyCadastroItems(geralQuery.data)}
+						isLoading={geralQuery.isFetching}
+						isError={geralQuery.isError}
 							items={getMantyzItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}

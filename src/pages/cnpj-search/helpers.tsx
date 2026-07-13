@@ -5,38 +5,46 @@ import type { GetMantyzResponse, GetMantyzCreditResponse } from '@/api/mantyz/ty
 import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
 
+function formatPhone(raw: string): string {
+	const n = raw.replace(/\D/g, '')
+	if (n.length === 11) return `(${n.slice(0, 2)}) ${n.slice(2, 7)}-${n.slice(7)}`
+	if (n.length === 10) return `(${n.slice(0, 2)}) ${n.slice(2, 6)}-${n.slice(6)}`
+	return raw
+}
+
 export function getCompanyItems(
 	mantyzData?: GetMantyzResponse['content'],
 	geralData?: GetMantyzCreditResponse['content']
 ): InfoCardItem[] {
-	// Prefer geral data (more complete) for identification fields, fall back to PesquisaDocumento
 	const geralDg = geralData?.identificacao?.dados_gerais
 	const mantyzDg = mantyzData?.pessoa_juridica?.identificacao.dados_gerais
-
 	const dadosGerais = geralDg ?? mantyzDg
 
-	const geralAddr = geralData?.identificacao?.dados_localizacao_contato?.endereco_principal
+	const geralLoc = geralData?.identificacao?.dados_localizacao_contato
+	const geralAddr = geralLoc?.endereco_principal
 	const mantyzAddr = mantyzData?.pessoa_juridica?.identificacao.dados_localizacao_contato.endereco_principal
 	const addressData = geralAddr ?? mantyzAddr
 
 	const address = addressData
-		? [
-				addressData.logradouro,
-				addressData.numero,
-				addressData.bairro,
-				addressData.municipio,
-				addressData.uf,
-			]
+		? [addressData.logradouro, addressData.numero, addressData.bairro, addressData.municipio, addressData.uf]
 				.filter(Boolean)
 				.join(', ')
 				.toUpperCase()
 		: '-'
 
-	// cnae_principal and cnaes_secundarios come from geral when available
+	const outrosEnderecos = geralLoc?.outros_enderecos ?? []
+
+	const emails = geralLoc?.emails ?? []
+	const emailPrimary = emails[0] ?? '-'
+	const emailOthers = emails.slice(1)
+
+	const phones = geralLoc?.telefones ?? []
+	const phonePrimary = phones[0] ? formatPhone(phones[0]) : '-'
+	const phoneOthers = phones.slice(1)
+
 	const cnaePrincipal = geralDg?.cnae_principal ?? null
 	const filteredCnaes = (geralDg?.cnaes_secundarios ?? []).filter((c) => c.id_cnae)
 
-	// nome_fantasia from historico_cadastral (geral only)
 	const historicoCadastral = geralDg?.historico_cadastral
 	const nomeFantasia =
 		historicoCadastral?.lista_historico_nome?.find((h) => h.nome_fantasia)?.nome_fantasia || '-'
@@ -51,9 +59,76 @@ export function getCompanyItems(
 		{ label: 'Razão social', value: dadosGerais?.nome || '-' },
 		{ label: 'Nome fantasia', value: nomeFantasia },
 		{ label: 'CNPJ', value: formatCnpj(dadosGerais?.cnpj_cpf) || '-' },
+		{ label: 'Natureza jurídica', value: geralDg?.descricao_natureza || '-' },
 		{ label: 'Fundação', value: fundacaoFormatted },
 		{ label: 'Capital social', value: formatCurrency(dadosGerais?.capital_social) || '-' },
-		{ label: 'Endereço', value: address },
+		{ label: 'Faturamento presumido', value: formatCurrency(geralDg?.faturamento_presumido) || '-' },
+		{ label: 'Tipo de unidade', value: geralDg?.tipo_unidade || '-' },
+		{ label: 'Filiais', value: geralDg?.filiais != null ? String(geralDg.filiais) : '-' },
+		{ label: 'Funcionários', value: geralDg?.funcionarios != null ? String(geralDg.funcionarios) : '-' },
+		{ label: 'Porte comercial', value: geralDg?.porte_comercial || '-' },
+		{
+			label: 'Endereço',
+			value:
+				outrosEnderecos.length > 0 && address !== '-' ? (
+					<span>
+						{address}{' '}
+						<ListDrawer
+							title='Outros endereços'
+							triggerLabel={`Ver ${outrosEnderecos.length} ${outrosEnderecos.length === 1 ? 'outro endereço' : 'outros endereços'}`}
+							data={outrosEnderecos}
+							columns={[
+								{
+									header: 'Logradouro',
+									render: (e) => `${e.logradouro}, ${e.numero}`.toUpperCase(),
+								},
+								{ header: 'Bairro', render: (e) => e.bairro?.toUpperCase() || '-' },
+								{
+									header: 'Município',
+									render: (e) => `${e.municipio} - ${e.uf}`.toUpperCase(),
+								},
+								{ header: 'CEP', render: (e) => e.cep || '-' },
+							]}
+						/>
+					</span>
+				) : (
+					address
+				),
+		},
+		{
+			label: 'Email',
+			value:
+				emailOthers.length > 0 ? (
+					<span>
+						{emailPrimary}{' '}
+						<ListDrawer
+							title='Outros emails'
+							triggerLabel={`Ver ${emailOthers.length} ${emailOthers.length === 1 ? 'outro email' : 'outros emails'}`}
+							data={emailOthers.map((e) => ({ email: e }))}
+							columns={[{ header: 'Email', render: (e) => e.email }]}
+						/>
+					</span>
+				) : (
+					emailPrimary
+				),
+		},
+		{
+			label: 'Telefone',
+			value:
+				phoneOthers.length > 0 ? (
+					<span>
+						{phonePrimary}{' '}
+						<ListDrawer
+							title='Outros telefones'
+							triggerLabel={`Ver ${phoneOthers.length} ${phoneOthers.length === 1 ? 'outro telefone' : 'outros telefones'}`}
+							data={phoneOthers.map((p) => ({ telefone: formatPhone(p) }))}
+							columns={[{ header: 'Telefone', render: (p) => p.telefone }]}
+						/>
+					</span>
+				) : (
+					phonePrimary
+				),
+		},
 		{
 			label: 'CNAE',
 			value: cnaePrincipal ? (
@@ -76,6 +151,44 @@ export function getCompanyItems(
 				'-'
 			),
 		},
+	]
+}
+
+export function getCompanyCadastroItems(
+	geralData?: GetMantyzCreditResponse['content']
+): InfoCardItem[] {
+	const geralDg = geralData?.identificacao?.dados_gerais
+
+	const situacaoReceita = (() => {
+		const desc = geralDg?.situacao_receita_descricao
+		const date = geralDg?.situacao_receita_data
+		if (!desc) return '-'
+		if (date) {
+			const d = dayjs(date)
+			return `${desc} — ${d.isValid() ? d.format('DD/MM/YYYY') : date}`
+		}
+		return desc
+	})()
+
+	const situacaoEspecial = (() => {
+		const desc = geralDg?.situacao_especial
+		const date = geralDg?.data_situacao_especial
+		if (!desc) return '-'
+		if (date) {
+			const d = dayjs(date)
+			return `${desc} — ${d.isValid() ? d.format('DD/MM/YYYY') : date}`
+		}
+		return desc
+	})()
+
+	return [
+		{ label: 'Porte tributário', value: geralDg?.porte || '-' },
+		{ label: 'Regime tributário', value: geralDg?.regime_tributario || '-' },
+		{ label: 'COMEX', value: geralDg?.comex || '-' },
+		{ label: 'Inscrição estadual', value: geralDg?.inscricao_estadual || '-' },
+		{ label: 'Situação Receita Federal', value: situacaoReceita },
+		{ label: 'Situação especial', value: situacaoEspecial },
+		{ label: 'Situação SINTEGRA', value: geralDg?.dados_sintegra?.status || '-' },
 	]
 }
 

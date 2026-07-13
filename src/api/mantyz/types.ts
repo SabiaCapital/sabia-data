@@ -508,6 +508,21 @@ type GeralDadosGerais = {
 			data_alteracao: string
 		}[]
 	} | null
+	porte: string | null
+	porte_comercial: string | null
+	tipo_unidade: string | null
+	filiais: number | null
+	funcionarios: number | null
+	regime_tributario: string | null
+	comex: string | null
+	inscricao_estadual: string | null
+	situacao_receita_descricao: string | null
+	situacao_receita_data: string | null
+	situacao_especial: string | null
+	data_situacao_especial: string | null
+	faturamento_presumido: number | null
+	descricao_natureza: string | null
+	dados_sintegra: { status: string | null } | null
 }
 
 type GeralEnderecoPrincipal = {
@@ -525,6 +540,17 @@ export type GetMantyzCreditResponse = {
 			dados_gerais: GeralDadosGerais
 			dados_localizacao_contato: {
 				endereco_principal: GeralEnderecoPrincipal
+				telefones: string[]
+				emails: string[]
+				outros_enderecos: {
+					logradouro: string
+					numero: string
+					bairro: string
+					municipio: string
+					uf: string
+					cep: string
+					complemento: string | null
+				}[]
 			}
 		}
 	} | null

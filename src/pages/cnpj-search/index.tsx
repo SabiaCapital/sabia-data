@@ -5,6 +5,7 @@ import {
 	BracesIcon,
 	ClipboardList,
 	Search,
+	ShieldCheck,
 	TextSearchIcon,
 	TrendingUp,
 	WindIcon,
@@ -26,7 +27,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { InfoCard } from '@/components/info-card'
-import { getCompanyItems, getCompanyCadastroItems, getMantyzItems } from './helpers'
+import { getCompanyItems, getCompanyCadastroItems, getScoreItems, getMantyzItems } from './helpers'
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
@@ -170,8 +171,17 @@ export function CnpjSearchPage() {
 
 					<div className='grid grid-cols-2 gap-4'>
 						<InfoCard
-							className='col-span-2'
-							description='Sobre'
+							className='col-span-2'						description='Análise de crédito'
+						title='Score Mantyz'
+						icon={<ShieldCheck />}
+						items={getScoreItems(geralQuery.data)}
+						isLoading={geralQuery.isFetching}
+						isError={geralQuery.isError}
+						skeletonCount={9}
+					/>
+
+					<InfoCard
+						className='col-span-2'							description='Sobre'
 							title='Empresa'
 							icon={<TrendingUp />}
 							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}

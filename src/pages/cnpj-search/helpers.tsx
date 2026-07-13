@@ -4,6 +4,7 @@ import { formatCnpj, formatCpf, isCnpj } from '@/utils/text'
 import type { GetMantyzResponse, GetMantyzCreditResponse } from '@/api/mantyz/types'
 import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
+import { Badge } from '@/components/ui/badge'
 
 function formatPhone(raw: string): string {
 	const n = raw.replace(/\D/g, '')
@@ -189,6 +190,116 @@ export function getCompanyCadastroItems(
 		{ label: 'Situação Receita Federal', value: situacaoReceita },
 		{ label: 'Situação especial', value: situacaoEspecial },
 		{ label: 'Situação SINTEGRA', value: geralDg?.dados_sintegra?.status || '-' },
+	]
+}
+
+export function getScoreItems(
+	geralData?: GetMantyzCreditResponse['content']
+): InfoCardItem[] {
+	const score = geralData?.score
+	const dgs = score?.dados_gerais_score
+
+	if (!dgs) return [{ label: 'Status', value: '-' }]
+
+	const bloqueios = (score?.notificacoes ?? []).filter(
+		(n) => n.descricao_evento === 'Bloqueio'
+	)
+	const notificacoes = (score?.notificacoes ?? []).filter(
+		(n) => n.descricao_evento !== 'Bloqueio'
+	)
+	const pontosNegativos = score?.pontos_negativos ?? []
+	const pontosAtencao = score?.pontos_atencao ?? []
+
+	const statusBadge = dgs.bloqueado ? (
+		<Badge variant='destructive'>BLOQUEADO</Badge>
+	) : dgs.ressalva ? (
+		<Badge variant='secondary'>RESSALVA</Badge>
+	) : (
+		<Badge>APROVADO</Badge>
+	)
+
+	const validadeFormatted = (() => {
+		if (!dgs.validade) return '-'
+		const d = dayjs(dgs.validade)
+		return d.isValid() ? d.format('DD/MM/YYYY') : dgs.validade
+	})()
+
+	return [
+		{ label: 'Status', value: statusBadge },
+		{
+			label: 'Score',
+			value: dgs.score != null ? String(dgs.score) : 'Não calculado',
+		},
+		{
+			label: 'Limite sugerido',
+			value: formatCurrency(dgs.limite_sugerido) || '-',
+		},
+		{ label: 'Política de crédito', value: dgs.politica_credito?.trim() || '-' },
+		{ label: 'Validade', value: validadeFormatted },
+		{
+			label: 'Bloqueios',
+			value: bloqueios.length ? (
+				<ListDrawer
+					title='Bloqueios'
+					triggerLabel={`Ver ${bloqueios.length} ${bloqueios.length === 1 ? 'bloqueio' : 'bloqueios'}`}
+					data={bloqueios}
+					columns={[
+						{ header: 'Motivo', render: (n) => n.nome },
+						{ header: 'Detalhe', render: (n) => n.descricao_faixa },
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+		{
+			label: 'Notificações',
+			value: notificacoes.length ? (
+				<ListDrawer
+					title='Notificações'
+					triggerLabel={`Ver ${notificacoes.length} ${notificacoes.length === 1 ? 'notificação' : 'notificações'}`}
+					data={notificacoes}
+					columns={[
+						{ header: 'Tipo', render: (n) => n.nome },
+						{ header: 'Detalhe', render: (n) => n.descricao_faixa },
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+		{
+			label: 'Pontos negativos',
+			value: pontosNegativos.length ? (
+				<ListDrawer
+					title='Pontos negativos'
+					triggerLabel={`Ver ${pontosNegativos.length} ${pontosNegativos.length === 1 ? 'ponto' : 'pontos'}`}
+					data={pontosNegativos}
+					columns={[
+						{ header: 'Critério', render: (p) => p.descricao },
+						{ header: 'Valor', render: (p) => p.texto_exibido_nos_indicadores },
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+		{
+			label: 'Pontos de atenção',
+			value: pontosAtencao.length ? (
+				<ListDrawer
+					title='Pontos de atenção'
+					triggerLabel={`Ver ${pontosAtencao.length} ${pontosAtencao.length === 1 ? 'ponto' : 'pontos'}`}
+					data={pontosAtencao}
+					columns={[
+						{ header: 'Critério', render: (p) => p.descricao },
+						{ header: 'Valor', render: (p) => p.texto_exibido_nos_indicadores },
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
 	]
 }
 

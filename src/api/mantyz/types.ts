@@ -534,6 +534,17 @@ type GeralEnderecoPrincipal = {
 	complemento: string | null
 }
 
+type ScorePoint = {
+	variavel_valor: string | boolean | null
+	peso: number
+	faixa_pontuacao: string
+	pontuacao: number | null
+	valor: number | null
+	descricao: string
+	valor_restricao: number | null
+	texto_exibido_nos_indicadores: string
+}
+
 export type GetMantyzCreditResponse = {
 	content: {
 		identificacao: {
@@ -553,5 +564,29 @@ export type GetMantyzCreditResponse = {
 				}[]
 			}
 		}
+		score: {
+			dados_gerais_score: {
+				cnpj_cpf: string
+				score: number | null
+				limite_sugerido: number
+				limite_solicitado: number
+				politica_credito: string
+				validade: string
+				analise_resultado: string
+				ressalva: boolean
+				faturamento_presumido: number | null
+				inclusao: string
+				bloqueado: boolean
+				id_cliente: number
+			}
+			pontos_positivos: ScorePoint[]
+			pontos_atencao: ScorePoint[]
+			pontos_negativos: ScorePoint[]
+			notificacoes: {
+				nome: string
+				descricao_evento: string
+				descricao_faixa: string
+			}[]
+		} | null
 	} | null
 }

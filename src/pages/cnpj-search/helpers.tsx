@@ -303,6 +303,69 @@ export function getScoreItems(
 	]
 }
 
+export function getRestitivosFiscaisItems(
+	geralData?: GetMantyzCreditResponse['content']
+): InfoCardItem[] {
+	const pf = geralData?.pendencias_financeiras
+	const pgfn = pf?.pgfn_debito_governo
+	const cndt = pf?.cndt?.atual
+	const fgts = pf?.fgts?.atual
+
+	const cndtValidade = (() => {
+		if (!cndt?.expiracao) return null
+		const d = dayjs(cndt.expiracao)
+		return d.isValid() ? d.format('DD/MM/YYYY') : cndt.expiracao
+	})()
+
+	const fgtsInicio = (() => {
+		if (!fgts?.validade_inicio) return null
+		const d = dayjs(fgts.validade_inicio)
+		return d.isValid() ? d.format('DD/MM/YYYY') : fgts.validade_inicio
+	})()
+
+	const fgtsFim = (() => {
+		if (!fgts?.validade_fim) return null
+		const d = dayjs(fgts.validade_fim)
+		return d.isValid() ? d.format('DD/MM/YYYY') : fgts.validade_fim
+	})()
+
+	return [
+		{
+			label: 'PGFN',
+			value: pgfn ? (
+				<span>
+					{`${pgfn.qtd_total_debito} ${pgfn.qtd_total_debito === 1 ? 'débito' : 'débitos'} — ${formatCurrency(pgfn.valor_total_debito)}`}{' '}
+					{pgfn.lista_debito?.length ? (
+						<ListDrawer
+							title='Débitos PGFN'
+							triggerLabel={`Ver ${pgfn.lista_debito.length} ${pgfn.lista_debito.length === 1 ? 'débito' : 'débitos'}`}
+							data={pgfn.lista_debito}
+							columns={[
+								{ header: 'Origem', render: (d) => d.origem || '-' },
+								{ header: 'Valor', render: (d) => formatCurrency(d.valor_consolidado) || '-' },
+								{ header: 'Situação', render: (d) => d.situacao_registro || '-' },
+								{ header: 'UF', render: (d) => d.uf_unidade_responsavel || '-' },
+							]}
+						/>
+					) : null}
+				</span>
+			) : '-',
+		},
+		{
+			label: 'CNDT',
+			value: cndt
+				? `${cndt.status}${cndtValidade ? ` — válido até ${cndtValidade}` : ''}${cndt.em_debito ? ' — em débito' : ''}`
+				: '-',
+		},
+		{
+			label: 'FGTS',
+			value: fgts
+				? `${fgts.status}${fgtsInicio && fgtsFim ? ` — ${fgtsInicio} a ${fgtsFim}` : ''}`
+				: '-',
+		},
+	]
+}
+
 export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
 	const company = data?.pessoa_juridica
 	const financialIssues = company?.pendencias_financeiras
@@ -345,7 +408,7 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 				: '-',
 		},
 		{
-			label: 'PGFN',
+			label: 'Dívidas vencidas',
 			value: debtsCount
 				? `${debtsCount} ${debtsCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(debtsValue)}`
 				: '-',

@@ -588,5 +588,46 @@ export type GetMantyzCreditResponse = {
 				descricao_faixa: string
 			}[]
 		} | null
+		pendencias_financeiras: {
+			pgfn_debito_governo: {
+				nome: string | null
+				valor_total_debito: number
+				qtd_total_debito: number
+				lista_debito_governo_origem: { nome: string; valor: number; quantidade: number }[]
+				lista_debito: {
+					origem: string
+					valor_consolidado: number
+					tipo_devedor: string
+					unidade_responsavel: string
+					uf_unidade_responsavel: string
+					numero_registro: string
+					situacao_registro_tipo: string
+					situacao_registro: string
+					indicador_arquivado: boolean
+					data_registro: string
+				}[]
+			} | null
+			cndt: {
+				atual: {
+					data_consulta: string
+					numero_protocolo: string
+					status: string
+					em_debito: boolean
+					texto_certificado: string
+					expiracao: string
+					base64_pdf: string | null
+				}
+				historico: any | null
+			} | null
+			fgts: {
+				atual: {
+					status: string
+					validade_inicio: string
+					validade_fim: string
+					base64_pdf: string | null
+				}
+				historico: any | null
+			} | null
+		} | null
 	} | null
 }

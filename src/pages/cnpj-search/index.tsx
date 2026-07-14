@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import {
 	BracesIcon,
 	ClipboardList,
+	Landmark,
 	Search,
 	ShieldCheck,
 	TextSearchIcon,
@@ -27,7 +28,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { InfoCard } from '@/components/info-card'
-import { getCompanyItems, getCompanyCadastroItems, getScoreItems, getMantyzItems } from './helpers'
+import { getCompanyItems, getCompanyCadastroItems, getScoreItems, getRestitivosFiscaisItems, getMantyzItems } from './helpers'
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
@@ -198,11 +199,30 @@ export function CnpjSearchPage() {
 						items={getCompanyCadastroItems(geralQuery.data)}
 						isLoading={geralQuery.isFetching}
 						isError={geralQuery.isError}
-							items={getMantyzItems(mantyzQuery.data)}
-							isLoading={mantyzQuery.isFetching}
-							isError={mantyzQuery.isError}
-							skeletonCount={6}
-						/>
+						skeletonCount={7}
+					/>
+
+					<InfoCard
+						className='col-span-2'
+						description='PGFN, CNDT e FGTS'
+						title='Restritivos Fiscais'
+						icon={<Landmark />}
+						items={getRestitivosFiscaisItems(geralQuery.data)}
+						isLoading={geralQuery.isFetching}
+						isError={geralQuery.isError}
+						skeletonCount={3}
+					/>
+
+					<InfoCard
+						className='col-span-2'
+						description='Mantyz'
+						title='Mantyz'
+						icon={<BracesIcon />}
+						items={getMantyzItems(mantyzQuery.data)}
+						isLoading={mantyzQuery.isFetching}
+						isError={mantyzQuery.isError}
+						skeletonCount={6}
+					/>
 					</div>
 				</div>
 			)}

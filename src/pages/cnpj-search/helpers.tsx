@@ -5,6 +5,7 @@ import type { GetMantyzResponse, GetMantyzCreditResponse } from '@/api/mantyz/ty
 import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 
 function formatPhone(raw: string): string {
 	const n = raw.replace(/\D/g, '')
@@ -55,104 +56,186 @@ export function getCompanyItems(
 		const d = dayjs(dadosGerais.fundacao)
 		return d.isValid() ? d.format('DD/MM/YYYY') : dadosGerais.fundacao
 	})()
+	// Build ordered and grouped items for the Empresa card.
+	const items: InfoCardItem[] = []
 
-	return [
-		{ label: 'Razão social', value: dadosGerais?.nome || '-' },
-		{ label: 'Nome fantasia', value: nomeFantasia },
-		{ label: 'CNPJ', value: formatCnpj(dadosGerais?.cnpj_cpf) || '-' },
-		{ label: 'Natureza jurídica', value: geralDg?.descricao_natureza || '-' },
-		{ label: 'Fundação', value: fundacaoFormatted },
-		{ label: 'Capital social', value: formatCurrency(dadosGerais?.capital_social) || '-' },
-		{ label: 'Faturamento presumido', value: formatCurrency(geralDg?.faturamento_presumido) || '-' },
-		{ label: 'Tipo de unidade', value: geralDg?.tipo_unidade || '-' },
-		{ label: 'Filiais', value: geralDg?.filiais != null ? String(geralDg.filiais) : '-' },
-		{ label: 'Funcionários', value: geralDg?.funcionarios != null ? String(geralDg.funcionarios) : '-' },
-		{ label: 'Porte comercial', value: geralDg?.porte_comercial || '-' },
-		{
-			label: 'Endereço',
-			value:
-				outrosEnderecos.length > 0 && address !== '-' ? (
-					<span>
-						{address}{' '}
-						<ListDrawer
-							title='Outros endereços'
-							triggerLabel={`Ver ${outrosEnderecos.length} ${outrosEnderecos.length === 1 ? 'outro endereço' : 'outros endereços'}`}
-							data={outrosEnderecos}
-							columns={[
-								{
-									header: 'Logradouro',
-									render: (e) => `${e.logradouro}, ${e.numero}`.toUpperCase(),
-								},
-								{ header: 'Bairro', render: (e) => e.bairro?.toUpperCase() || '-' },
-								{
-									header: 'Município',
-									render: (e) => `${e.municipio} - ${e.uf}`.toUpperCase(),
-								},
-								{ header: 'CEP', render: (e) => e.cep || '-' },
-							]}
-						/>
-					</span>
-				) : (
-					address
-				),
-		},
-		{
-			label: 'Email',
-			value:
-				emailOthers.length > 0 ? (
-					<span>
-						{emailPrimary}{' '}
+	// Primary top-line fields (ordered): Razão social, CNPJ, Endereço, Email/Telefone (same line)
+	items.push({ label: 'Razão social', value: dadosGerais?.nome || '-' })
+	items.push({ label: 'CNPJ', value: formatCnpj(dadosGerais?.cnpj_cpf) || '-' })
+	items.push({
+		label: 'Endereço',
+		value:
+			outrosEnderecos.length > 0 && address !== '-' ? (
+				<span>
+					{address}{' '}
+					<ListDrawer
+						title='Outros endereços'
+						triggerLabel={`Ver ${outrosEnderecos.length} ${outrosEnderecos.length === 1 ? 'outro endereço' : 'outros endereços'}`}
+						data={outrosEnderecos}
+						columns={[
+							{
+								header: 'Logradouro',
+								render: (e) => `${e.logradouro}, ${e.numero}`.toUpperCase(),
+							},
+							{ header: 'Bairro', render: (e) => e.bairro?.toUpperCase() || '-' },
+							{
+								header: 'Município',
+								render: (e) => `${e.municipio} - ${e.uf}`.toUpperCase(),
+							},
+							{ header: 'CEP', render: (e) => e.cep || '-' },
+						]}
+					/>
+				</span>
+			) : (
+				address
+			),
+	})
+
+	items.push({
+		label: 'Email',
+		value: (
+			<span>
+				{emailPrimary}
+				{emailOthers.length > 0 ? (
+					<>
+						{' '}
 						<ListDrawer
 							title='Outros emails'
 							triggerLabel={`Ver ${emailOthers.length} ${emailOthers.length === 1 ? 'outro email' : 'outros emails'}`}
 							data={emailOthers.map((e) => ({ email: e }))}
 							columns={[{ header: 'Email', render: (e) => e.email }]}
 						/>
-					</span>
-				) : (
-					emailPrimary
-				),
-		},
-		{
-			label: 'Telefone',
-			value:
-				phoneOthers.length > 0 ? (
-					<span>
-						{phonePrimary}{' '}
+					</>
+				) : null}
+			</span>
+		),
+	})
+
+	items.push({
+		label: 'Telefone',
+		value: (
+			<span>
+				{phonePrimary}
+				{phoneOthers.length > 0 ? (
+					<>
+						{' '}
 						<ListDrawer
 							title='Outros telefones'
 							triggerLabel={`Ver ${phoneOthers.length} ${phoneOthers.length === 1 ? 'outro telefone' : 'outros telefones'}`}
 							data={phoneOthers.map((p) => ({ telefone: formatPhone(p) }))}
 							columns={[{ header: 'Telefone', render: (p) => p.telefone }]}
 						/>
-					</span>
-				) : (
-					phonePrimary
-				),
-		},
-		{
-			label: 'CNAE',
-			value: cnaePrincipal ? (
-				<span>
-					{`${cnaePrincipal.id_cnae} - ${cnaePrincipal.descricao_cnae} `}
+					</>
+				) : null}
+			</span>
+		),
+	})
 
-					{filteredCnaes.length ? (
-						<ListDrawer
-							title='CNAEs secundárias'
-							triggerLabel={`Ver ${filteredCnaes.length} ${filteredCnaes.length === 1 ? 'CNAE secundária' : 'CNAEs secundárias'}`}
-							data={filteredCnaes}
-							columns={[
-								{ header: 'Código', render: (c) => c.id_cnae || '-' },
-								{ header: 'Descrição', render: (c) => c.descricao_cnae || '-' },
-							]}
-						/>
-					) : null}
-				</span>
-			) : (
-				'-'
-			),
-		},
-	]
+	// Dados gerais subtitle with pairs on the same line
+	items.push({
+		label: '',
+		value: (
+			<div className='flex flex-col gap-2'>
+				<Separator className='my-2' />
+				<div className='text-lg font-semibold text-foreground'>Dados gerais</div>
+				<div className='grid grid-cols-2 gap-4 mt-2'>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Fundação</div>
+						<div>{fundacaoFormatted}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Tipo de Unidade</div>
+						<div>{geralDg?.tipo_unidade || '-'}</div>
+					</div>
+
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Filiais</div>
+						<div>{geralDg?.filiais != null ? String(geralDg.filiais) : '-'}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Funcionários</div>
+						<div>{geralDg?.funcionarios != null ? String(geralDg.funcionarios) : '-'}</div>
+					</div>
+
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Porte comercial</div>
+						<div>{geralDg?.porte_comercial || '-'}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Porte tributário</div>
+						<div>{geralDg?.porte || '-'}</div>
+					</div>
+
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Regime tributário</div>
+						<div>{geralDg?.regime_tributario || '-'}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>COMEX</div>
+						<div>{geralDg?.comex || '-'}</div>
+					</div>
+
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Inscrição estadual</div>
+						<div>{geralDg?.inscricao_estadual || '-'}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Situação Receita Federal</div>
+						<div>{geralDg?.situacao_receita_descricao || '-'}</div>
+					</div>
+
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Situação especial</div>
+						<div>{geralDg?.situacao_especial || '-'}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Situação SINTEGRA</div>
+						<div>{geralDg?.dados_sintegra?.status || '-'}</div>
+					</div>
+
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Capital social</div>
+						<div>{formatCurrency(dadosGerais?.capital_social) || '-'}</div>
+					</div>
+					<div>
+						<div className='text-sm font-semibold text-foreground'>Faturamento</div>
+						<div>{formatCurrency(geralDg?.faturamento_presumido) || '-'}</div>
+					</div>
+				</div>
+
+				<div className='mt-3'>
+					<div className='text-sm font-semibold text-foreground'>Natureza jurídica</div>
+					<div>{geralDg?.descricao_natureza || '-'}</div>
+				</div>
+
+				<div className='mt-2'>
+					<div className='text-sm font-semibold text-foreground'>CNAE</div>
+					<div className=''>
+						{cnaePrincipal ? (
+							<span>
+								{`${cnaePrincipal.id_cnae} - ${cnaePrincipal.descricao_cnae} `}
+								{filteredCnaes.length ? (
+									<ListDrawer
+										title='CNAEs secundárias'
+										triggerLabel={`Ver ${filteredCnaes.length} ${filteredCnaes.length === 1 ? 'CNAE secundária' : 'CNAEs secundárias'}`}
+										data={filteredCnaes}
+										columns={[
+											{ header: 'Código', render: (c) => c.id_cnae || '-' },
+											{ header: 'Descrição', render: (c) => c.descricao_cnae || '-' },
+										]}
+									/>
+								) : null}
+							</span>
+						) : (
+							'-'
+						)}
+					</div>
+				</div>
+			</div>
+		),
+	})
+
+	return items
 }
 
 export function getCompanyCadastroItems(

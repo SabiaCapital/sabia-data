@@ -170,59 +170,61 @@ export function CnpjSearchPage() {
 						</AlertDescription>
 					</Alert>
 
-					<div className='grid grid-cols-2 gap-4'>
+					<div className='grid grid-cols-3 gap-4'>
 						<InfoCard
-							className='col-span-2'						description='Análise de crédito'
-						title='Score Mantyz'
-						icon={<ShieldCheck />}
-						items={getScoreItems(geralQuery.data)}
-						isLoading={geralQuery.isFetching}
-						isError={geralQuery.isError}
-						skeletonCount={9}
-					/>
-
-					<InfoCard
-						className='col-span-2'							description='Sobre'
+							className='col-span-2'
+							description='Sobre'
 							title='Empresa'
 							icon={<TrendingUp />}
 							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}
 							isLoading={mantyzQuery.isFetching || geralQuery.isFetching}
 							isError={mantyzQuery.isError}
-						skeletonCount={15}
-					/>
+							skeletonCount={15}
+						/>
 
-					<InfoCard
-						className='col-span-2'
-						description='Fiscal e cadastral'
-						title='Dados Cadastrais'
-						icon={<ClipboardList />}
-						items={getCompanyCadastroItems(geralQuery.data)}
-						isLoading={geralQuery.isFetching}
-						isError={geralQuery.isError}
-						skeletonCount={7}
-					/>
+						<InfoCard
+							className='col-span-1'
+							description='Análise de crédito'
+							title='Score Mantyz'
+							icon={<ShieldCheck />}
+							items={getScoreItems(geralQuery.data)}
+							isLoading={geralQuery.isFetching}
+							isError={geralQuery.isError}
+							skeletonCount={9}
+						/>
 
-					<InfoCard
-						className='col-span-2'
-						description='PGFN, CNDT e FGTS'
-						title='Restritivos Fiscais'
-						icon={<Landmark />}
-						items={getRestitivosFiscaisItems(geralQuery.data)}
-						isLoading={geralQuery.isFetching}
-						isError={geralQuery.isError}
-						skeletonCount={3}
-					/>
+						<InfoCard
+							className='col-span-2'
+							description='Fiscal e cadastral'
+							title='Dados Cadastrais'
+							icon={<ClipboardList />}
+							items={getCompanyCadastroItems(geralQuery.data)}
+							isLoading={geralQuery.isFetching}
+							isError={geralQuery.isError}
+							skeletonCount={7}
+						/>
 
-					<InfoCard
-						className='col-span-2'
-						description='Mantyz'
-						title='Mantyz'
-						icon={<BracesIcon />}
-						items={getMantyzItems(mantyzQuery.data)}
-						isLoading={mantyzQuery.isFetching}
-						isError={mantyzQuery.isError}
-						skeletonCount={6}
-					/>
+						<InfoCard
+							className='col-span-1'
+							description='PGFN, CNDT e FGTS'
+							title='Restritivos Fiscais'
+							icon={<Landmark />}
+							items={getRestitivosFiscaisItems(geralQuery.data)}
+							isLoading={geralQuery.isFetching}
+							isError={geralQuery.isError}
+							skeletonCount={3}
+						/>
+
+						<InfoCard
+							className='col-span-3'
+							description='Mantyz'
+							title='Mantyz'
+							icon={<BracesIcon />}
+							items={getMantyzItems(mantyzQuery.data)}
+							isLoading={mantyzQuery.isFetching}
+							isError={mantyzQuery.isError}
+							skeletonCount={6}
+						/>
 					</div>
 				</div>
 			)}

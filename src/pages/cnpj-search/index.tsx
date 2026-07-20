@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
@@ -31,7 +31,8 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { InfoCard } from '@/components/info-card'
-import { getCompanyItems, getScoreItems, getMarketRestrictionsItems, getRestitivosFiscaisItems, getSocietyStructureItems, getPaymentHistoryItems, getEvolutionHistoryItems, getConsultationsItems } from './helpers'
+import { SabiaScoreModal } from '@/components/sabia-score-modal'
+import { getCompanyItems, getScoreItems, getMarketRestrictionsItems, getRestitivosFiscaisItems, getSocietyStructureItems, getPaymentHistoryItems, getEvolutionHistoryItems, getConsultationsItems, getSabiaScore } from './helpers'
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
@@ -57,6 +58,11 @@ export function CnpjSearchPage() {
 		queryFn: () => getMantyzGeral(searchedCnpj!),
 		enabled: !!searchedCnpj,
 	})
+
+	// Calculate Sabia Score
+	const sabiaScore = useMemo(() => {
+		return getSabiaScore(mantyzQuery.data?.content, geralQuery.data?.content)
+	}, [mantyzQuery.data, geralQuery.data])
 
 	const isCnpjInvalid =
 		mantyzQuery.isError && (mantyzQuery.error as any)?.response?.status === 412
@@ -179,29 +185,61 @@ export function CnpjSearchPage() {
 							description='Sobre'
 							title='Empresa'
 							icon={<TrendingUp />}
-							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}
+							items={getCompanyItems(mantyzQuery.data?.content, geralQuery.data?.content)}
 							isLoading={mantyzQuery.isFetching || geralQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={15}
 						/>
 
-						<InfoCard
-							className='col-span-1'
-							description='Análise de crédito'
-							title='Score Mantyz'
-							icon={<ShieldCheck />}
-							items={getScoreItems(geralQuery.data)}
-							isLoading={geralQuery.isFetching}
-							isError={geralQuery.isError}
-							skeletonCount={9}
-						/>
+						<div className='col-span-1 flex flex-col gap-4'>
+							<InfoCard
+								description='Score Mantyz'
+								title='Score Mantyz'
+								icon={<ShieldCheck />}
+								items={getScoreItems(geralQuery.data?.content)}
+								isLoading={geralQuery.isFetching}
+								isError={geralQuery.isError}
+								skeletonCount={9}
+							/>
+
+							<div className='bg-card rounded-lg border border-border p-4'>
+								<div className='flex items-center justify-between mb-4'>
+									<div className='text-sm font-semibold text-foreground'>Score Sábia</div>
+									<SabiaScoreModal calculation={sabiaScore} />
+								</div>
+
+								<div className='space-y-3'>
+									<div>
+										<div className='text-xs text-muted-foreground mb-1'>Score obtido</div>
+										<div className='text-lg font-semibold text-foreground'>
+											{sabiaScore.totalScore} / {sabiaScore.maxScore}
+										</div>
+									</div>
+
+									<Separator className='my-2' />
+
+									<div>
+										<div className='text-xs text-muted-foreground mb-1'>Classificação</div>
+										<div className={`text-sm font-semibold ${
+											sabiaScore.classification === 'Risco Baixo'
+												? 'text-green-600'
+												: sabiaScore.classification === 'Risco Médio'
+													? 'text-yellow-600'
+													: 'text-red-600'
+										}`}>
+											{sabiaScore.classification}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 
 						<InfoCard
 							className='col-span-1'
 							description='Restrições'
 							title='Restrições de Mercado'
 							icon={<AlertTriangle />}
-							items={getMarketRestrictionsItems(mantyzQuery.data)}
+							items={getMarketRestrictionsItems(mantyzQuery.data?.content)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={7}
@@ -212,7 +250,7 @@ export function CnpjSearchPage() {
 							description='PGFN, CNDT e FGTS'
 							title='Restrições Fiscais'
 							icon={<Landmark />}
-							items={getRestitivosFiscaisItems(geralQuery.data)}
+							items={getRestitivosFiscaisItems(geralQuery.data?.content)}
 							isLoading={geralQuery.isFetching}
 							isError={geralQuery.isError}
 							skeletonCount={3}
@@ -223,7 +261,7 @@ export function CnpjSearchPage() {
 							description='Sócios e Administradores'
 							title='Estrutura Societária'
 							icon={<Users />}
-							items={getSocietyStructureItems(mantyzQuery.data)}
+							items={getSocietyStructureItems(mantyzQuery.data?.content)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={3}
@@ -234,7 +272,7 @@ export function CnpjSearchPage() {
 							description='Mercado, Cedente, Sacado e Factoring'
 							title='Histórico de Pagamentos'
 							icon={<Clock />}
-							items={getPaymentHistoryItems(mantyzQuery.data)}
+							items={getPaymentHistoryItems(mantyzQuery.data?.content)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={4}
@@ -245,7 +283,7 @@ export function CnpjSearchPage() {
 							description='Evolução e Alterações'
 							title='Histórico / Evolução'
 							icon={<BarChart3 />}
-							items={getEvolutionHistoryItems(mantyzQuery.data)}
+							items={getEvolutionHistoryItems(mantyzQuery.data?.content)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={9}
@@ -256,7 +294,7 @@ export function CnpjSearchPage() {
 							description='Histórico de consultas'
 							title='Consultas'
 							icon={<FileText />}
-							items={getConsultationsItems(mantyzQuery.data)}
+							items={getConsultationsItems(mantyzQuery.data?.content)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={1}

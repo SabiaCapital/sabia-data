@@ -6,6 +6,7 @@ import type { InfoCardItem } from '@/components/info-card/types'
 import { ListDrawer } from '@/components/list-drawer'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { calculateSabiaScore, type SabiaScoreCalculation } from '@/lib/sabia-score'
 
 function formatPhone(raw: string): string {
 	const n = raw.replace(/\D/g, '')
@@ -1202,4 +1203,11 @@ export function getConsultationsItems(data?: GetMantyzResponse['content']): Info
 			),
 		},
 	]
+}
+
+export function getSabiaScore(
+	mantyzData?: GetMantyzResponse['content'],
+	geralData?: GetMantyzCreditResponse['content']
+): SabiaScoreCalculation {
+	return calculateSabiaScore(mantyzData, geralData)
 }

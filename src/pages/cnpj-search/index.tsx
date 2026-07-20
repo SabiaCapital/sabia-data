@@ -61,7 +61,7 @@ export function CnpjSearchPage() {
 
 	// Calculate Sabia Score
 	const sabiaScore = useMemo(() => {
-		return getSabiaScore(mantyzQuery.data?.content, geralQuery.data?.content)
+		return getSabiaScore(mantyzQuery.data, geralQuery.data)
 	}, [mantyzQuery.data, geralQuery.data])
 
 	const isCnpjInvalid =
@@ -185,7 +185,7 @@ export function CnpjSearchPage() {
 							description='Sobre'
 							title='Empresa'
 							icon={<TrendingUp />}
-							items={getCompanyItems(mantyzQuery.data?.content, geralQuery.data?.content)}
+							items={getCompanyItems(mantyzQuery.data, geralQuery.data)}
 							isLoading={mantyzQuery.isFetching || geralQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={15}
@@ -196,7 +196,7 @@ export function CnpjSearchPage() {
 								description='Score Mantyz'
 								title='Score Mantyz'
 								icon={<ShieldCheck />}
-								items={getScoreItems(geralQuery.data?.content)}
+								items={getScoreItems(geralQuery.data)}
 								isLoading={geralQuery.isFetching}
 								isError={geralQuery.isError}
 								skeletonCount={9}
@@ -239,7 +239,7 @@ export function CnpjSearchPage() {
 							description='Restrições'
 							title='Restrições de Mercado'
 							icon={<AlertTriangle />}
-							items={getMarketRestrictionsItems(mantyzQuery.data?.content)}
+							items={getMarketRestrictionsItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={7}
@@ -250,7 +250,7 @@ export function CnpjSearchPage() {
 							description='PGFN, CNDT e FGTS'
 							title='Restrições Fiscais'
 							icon={<Landmark />}
-							items={getRestitivosFiscaisItems(geralQuery.data?.content)}
+							items={getRestitivosFiscaisItems(geralQuery.data)}
 							isLoading={geralQuery.isFetching}
 							isError={geralQuery.isError}
 							skeletonCount={3}
@@ -261,7 +261,7 @@ export function CnpjSearchPage() {
 							description='Sócios e Administradores'
 							title='Estrutura Societária'
 							icon={<Users />}
-							items={getSocietyStructureItems(mantyzQuery.data?.content)}
+							items={getSocietyStructureItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={3}
@@ -272,7 +272,7 @@ export function CnpjSearchPage() {
 							description='Mercado, Cedente, Sacado e Factoring'
 							title='Histórico de Pagamentos'
 							icon={<Clock />}
-							items={getPaymentHistoryItems(mantyzQuery.data?.content)}
+							items={getPaymentHistoryItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={4}
@@ -283,7 +283,7 @@ export function CnpjSearchPage() {
 							description='Evolução e Alterações'
 							title='Histórico / Evolução'
 							icon={<BarChart3 />}
-							items={getEvolutionHistoryItems(mantyzQuery.data?.content)}
+							items={getEvolutionHistoryItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={9}
@@ -294,7 +294,7 @@ export function CnpjSearchPage() {
 							description='Histórico de consultas'
 							title='Consultas'
 							icon={<FileText />}
-							items={getConsultationsItems(mantyzQuery.data?.content)}
+							items={getConsultationsItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
 							skeletonCount={1}

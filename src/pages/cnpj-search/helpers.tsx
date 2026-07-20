@@ -56,6 +56,17 @@ export function getCompanyItems(
 		const d = dayjs(dadosGerais.fundacao)
 		return d.isValid() ? d.format('DD/MM/YYYY') : dadosGerais.fundacao
 	})()
+
+	const situacaoReceitaFormatted = (() => {
+		const desc = geralDg?.situacao_receita_descricao
+		const date = geralDg?.situacao_receita_data
+		if (!desc) return '-'
+		if (date) {
+			const d = dayjs(date)
+			return `${desc} — ${d.isValid() ? d.format('DD/MM/YYYY') : date}`
+		}
+		return desc
+	})()
 	// Build ordered and grouped items for the Empresa card.
 	const items: InfoCardItem[] = []
 
@@ -181,7 +192,7 @@ export function getCompanyItems(
 					</div>
 					<div>
 						<div className='text-sm font-semibold text-foreground'>Situação Receita Federal</div>
-						<div>{geralDg?.situacao_receita_descricao || '-'}</div>
+						<div>{situacaoReceitaFormatted}</div>
 					</div>
 
 					<div>
@@ -307,18 +318,26 @@ export function getScoreItems(
 		return d.isValid() ? d.format('DD/MM/YYYY') : dgs.validade
 	})()
 
-	return [
+	const items: InfoCardItem[] = [
 		{ label: 'Status', value: statusBadge },
-		{
-			label: 'Score',
-			value: dgs.score != null ? String(dgs.score) : 'Não calculado',
-		},
 		{
 			label: 'Limite sugerido',
 			value: formatCurrency(dgs.limite_sugerido) || '-',
 		},
+		{
+			label: 'Score',
+			value: dgs.score != null ? String(dgs.score) : 'Não calculado',
+		},
 		{ label: 'Política de crédito', value: dgs.politica_credito?.trim() || '-' },
 		{ label: 'Validade', value: validadeFormatted },
+		{
+			label: '',
+			value: <Separator className='my-3' />,
+		},
+		{
+			label: '',
+			value: <div className='text-lg font-semibold text-foreground'>Alertas</div>,
+		},
 		{
 			label: 'Bloqueios',
 			value: bloqueios.length ? (
@@ -336,11 +355,11 @@ export function getScoreItems(
 			),
 		},
 		{
-			label: 'Notificações',
+			label: 'Ressalvas',
 			value: notificacoes.length ? (
 				<ListDrawer
-					title='Notificações'
-					triggerLabel={`Ver ${notificacoes.length} ${notificacoes.length === 1 ? 'notificação' : 'notificações'}`}
+					title='Ressalvas'
+					triggerLabel={`Ver ${notificacoes.length} ${notificacoes.length === 1 ? 'ressalva' : 'ressalvas'}`}
 					data={notificacoes}
 					columns={[
 						{ header: 'Tipo', render: (n) => n.nome },
@@ -384,6 +403,8 @@ export function getScoreItems(
 			),
 		},
 	]
+
+	return items
 }
 
 export function getRestitivosFiscaisItems(
@@ -574,6 +595,137 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 				'-'
 			),
 		},
+	]
+}
+
+export function getMarketRestrictionsItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
+	const company = data?.pessoa_juridica
+	const financialIssues = company?.pendencias_financeiras
+	const marketRestrictions = financialIssues?.restritivo_mercado
+	const legalActions = financialIssues?.acoes
+
+	const pefinCount = marketRestrictions?.qtd_pefin
+	const pefinValue = marketRestrictions?.valor_pefin
+
+	const refinCount = marketRestrictions?.qtd_refin
+	const refinValue = marketRestrictions?.valor_refin
+
+	const protestsCount = marketRestrictions?.qtd_protestos
+	const protestsValue = marketRestrictions?.valor_protestos
+
+	const debtsCount = marketRestrictions?.qtd_dividas_vencidas
+	const debtsValue = marketRestrictions?.valor_dividas_venciadas
+
+	return [
+		{
+			label: 'PEFIN',
+			value: pefinCount
+				? `${pefinCount} ${pefinCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(pefinValue)}`
+				: '-',
+		},
+		{
+			label: 'REFIN',
+			value: refinCount
+				? `${refinCount} ${refinCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(refinValue)}`
+				: '-',
+		},
+		{
+			label: 'Protestos',
+			value: protestsCount
+				? `${protestsCount} ${protestsCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(protestsValue)}`
+				: '-',
+		},
+		{
+			label: 'Dívidas vencidas',
+			value: debtsCount
+				? `${debtsCount} ${debtsCount === 1 ? 'registro' : 'registros'} - ${formatCurrency(debtsValue)}`
+				: '-',
+		},
+		{
+			label: 'Cheques sem fundo',
+			value: financialIssues?.cheques_sem_fundo?.length ? (
+				<ListDrawer
+					title='Cheques sem fundo'
+					triggerLabel={`Ver ${financialIssues.cheques_sem_fundo.length} ${financialIssues.cheques_sem_fundo.length === 1 ? 'registro' : 'registros'}`}
+					data={financialIssues.cheques_sem_fundo}
+					columns={[
+						{ header: 'Banco', render: (c) => c.banco || '-' },
+						{ header: 'Agência', render: (c) => c.agencia || '-' },
+						{ header: 'Tipo', render: (c) => c.cheque || '-' },
+						{ header: 'Quantidade', render: (c) => c.quantidade ?? '-' },
+						{ header: 'Valor', render: (c) => formatCurrency(c.valor) || '-' },
+						{
+							header: 'Último',
+							render: (c) => {
+								const date = dayjs(c.data)
+								return date.isValid() ? date.format('DD/MM/YYYY') : '-'
+							},
+						},
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+		{
+			label: 'Ações judiciais',
+			value: legalActions?.acoes_judiciais?.length ? (
+				<ListDrawer
+					title='Ações judiciais'
+					triggerLabel={`Ver ${legalActions.acoes_judiciais.length} ${legalActions.acoes_judiciais.length === 1 ? 'ação' : 'ações'}`}
+					data={legalActions.acoes_judiciais}
+					columns={[
+						{ header: 'Natureza', render: (a) => a.natureza || '-' },
+						{ header: 'Vara', render: (a) => (a.vara ? `${a.vara}ª` : '-') },
+						{ header: 'UF', render: (a) => a.uf || '-' },
+						{ header: 'Cidade', render: (a) => a.cidade || '-' },
+						{ header: 'Valor', render: (a) => formatCurrency(a.valor) || '-' },
+						{
+							header: 'Data',
+							render: (a) => {
+								const date = dayjs(a.data)
+								return date.isValid() ? date.format('DD/MM/YYYY') : '-'
+							},
+						},
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+		{
+			label: 'Ações trabalhistas',
+			value: legalActions?.acoes_trabalhistas?.length ? (
+				<ListDrawer
+					title='Ações trabalhistas'
+					triggerLabel={`Ver ${legalActions.acoes_trabalhistas.length} ${legalActions.acoes_trabalhistas.length === 1 ? 'ação' : 'ações'}`}
+					data={legalActions.acoes_trabalhistas}
+					columns={[
+						{ header: 'Natureza', render: (a) => a.natureza || '-' },
+						{ header: 'Vara', render: (a) => (a.vara ? `${a.vara}ª` : '-') },
+						{ header: 'UF', render: (a) => a.uf || '-' },
+						{ header: 'Cidade', render: (a) => a.cidade || '-' },
+						{ header: 'Valor', render: (a) => formatCurrency(a.valor) || '-' },
+						{
+							header: 'Data',
+							render: (a) => {
+								const date = dayjs(a.data)
+								return date.isValid() ? date.format('DD/MM/YYYY') : '-'
+							},
+						},
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+	]
+}
+
+export function getSocietyStructureItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
+	const identification = data?.pessoa_juridica?.identificacao
+
+	return [
 		{
 			label: 'Quadro societário',
 			value: identification?.dados_socios?.length ? (
@@ -671,6 +823,13 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 				'-'
 			),
 		},
+	]
+}
+
+export function getPaymentHistoryItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
+	const paymentHistory = data?.pessoa_juridica?.evolucoes?.evolucao_historico_pagamento
+
+	return [
 		{
 			label: 'Hist. pagamento - Mercado',
 			value: paymentHistory?.mercado?.length ? (
@@ -771,6 +930,14 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 				'-'
 			),
 		},
+	]
+}
+
+export function getEvolutionHistoryItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
+	const evolution = data?.pessoa_juridica?.evolucoes
+	const identification = data?.pessoa_juridica?.identificacao
+
+	return [
 		{
 			label: 'Evolução - PEFIN',
 			value: evolution?.evolucao_pefin?.dados?.length ? (
@@ -1003,6 +1170,13 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 				'-'
 			),
 		},
+	]
+}
+
+export function getConsultationsItems(data?: GetMantyzResponse['content']): InfoCardItem[] {
+	const evolution = data?.pessoa_juridica?.evolucoes
+
+	return [
 		{
 			label: 'Consultas',
 			value: evolution?.evolucao_historico_consulta?.dados?.length ? (

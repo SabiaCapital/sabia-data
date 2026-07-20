@@ -2,8 +2,6 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import {
-	BracesIcon,
-	ClipboardList,
 	Landmark,
 	Search,
 	ShieldCheck,
@@ -11,6 +9,11 @@ import {
 	TrendingUp,
 	WindIcon,
 	AlertCircleIcon,
+	AlertTriangle,
+	Users,
+	Clock,
+	BarChart3,
+	FileText,
 } from 'lucide-react'
 import { isCnpj, cnpjMask, onlyNumbers } from '@/utils/text'
 import { getMantyz, getMantyzGeral } from '@/api/mantyz'
@@ -28,7 +31,7 @@ import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { InfoCard } from '@/components/info-card'
-import { getCompanyItems, getCompanyCadastroItems, getScoreItems, getRestitivosFiscaisItems, getMantyzItems } from './helpers'
+import { getCompanyItems, getScoreItems, getMarketRestrictionsItems, getRestitivosFiscaisItems, getSocietyStructureItems, getPaymentHistoryItems, getEvolutionHistoryItems, getConsultationsItems } from './helpers'
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
@@ -194,20 +197,20 @@ export function CnpjSearchPage() {
 						/>
 
 						<InfoCard
-							className='col-span-2'
-							description='Fiscal e cadastral'
-							title='Dados Cadastrais'
-							icon={<ClipboardList />}
-							items={getCompanyCadastroItems(geralQuery.data)}
-							isLoading={geralQuery.isFetching}
-							isError={geralQuery.isError}
+							className='col-span-1'
+							description='Restrições'
+							title='Restrições de Mercado'
+							icon={<AlertTriangle />}
+							items={getMarketRestrictionsItems(mantyzQuery.data)}
+							isLoading={mantyzQuery.isFetching}
+							isError={mantyzQuery.isError}
 							skeletonCount={7}
 						/>
 
 						<InfoCard
 							className='col-span-1'
 							description='PGFN, CNDT e FGTS'
-							title='Restritivos Fiscais'
+							title='Restrições Fiscais'
 							icon={<Landmark />}
 							items={getRestitivosFiscaisItems(geralQuery.data)}
 							isLoading={geralQuery.isFetching}
@@ -216,14 +219,47 @@ export function CnpjSearchPage() {
 						/>
 
 						<InfoCard
-							className='col-span-3'
-							description='Mantyz'
-							title='Mantyz'
-							icon={<BracesIcon />}
-							items={getMantyzItems(mantyzQuery.data)}
+							className='col-span-1'
+							description='Sócios e Administradores'
+							title='Estrutura Societária'
+							icon={<Users />}
+							items={getSocietyStructureItems(mantyzQuery.data)}
 							isLoading={mantyzQuery.isFetching}
 							isError={mantyzQuery.isError}
-							skeletonCount={6}
+							skeletonCount={3}
+						/>
+
+						<InfoCard
+							className='col-span-1'
+							description='Mercado, Cedente, Sacado e Factoring'
+							title='Histórico de Pagamentos'
+							icon={<Clock />}
+							items={getPaymentHistoryItems(mantyzQuery.data)}
+							isLoading={mantyzQuery.isFetching}
+							isError={mantyzQuery.isError}
+							skeletonCount={4}
+						/>
+
+						<InfoCard
+							className='col-span-1'
+							description='Evolução e Alterações'
+							title='Histórico / Evolução'
+							icon={<BarChart3 />}
+							items={getEvolutionHistoryItems(mantyzQuery.data)}
+							isLoading={mantyzQuery.isFetching}
+							isError={mantyzQuery.isError}
+							skeletonCount={9}
+						/>
+
+						<InfoCard
+							className='col-span-1'
+							description='Histórico de consultas'
+							title='Consultas'
+							icon={<FileText />}
+							items={getConsultationsItems(mantyzQuery.data)}
+							isLoading={mantyzQuery.isFetching}
+							isError={mantyzQuery.isError}
+							skeletonCount={1}
 						/>
 					</div>
 				</div>

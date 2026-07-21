@@ -48,10 +48,6 @@ export function getCompanyItems(
 	const cnaePrincipal = geralDg?.cnae_principal ?? null
 	const filteredCnaes = (geralDg?.cnaes_secundarios ?? []).filter((c) => c.id_cnae)
 
-	const historicoCadastral = geralDg?.historico_cadastral
-	const nomeFantasia =
-		historicoCadastral?.lista_historico_nome?.find((h) => h.nome_fantasia)?.nome_fantasia || '-'
-
 	const fundacaoFormatted = (() => {
 		if (!dadosGerais?.fundacao) return '-'
 		const d = dayjs(dadosGerais.fundacao)
@@ -475,8 +471,6 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 	const company = data?.pessoa_juridica
 	const financialIssues = company?.pendencias_financeiras
 	const marketRestrictions = financialIssues?.restritivo_mercado
-	const identification = company?.identificacao
-	const evolution = company?.evolucoes
 	const legalActions = financialIssues?.acoes
 
 	const pefinCount = marketRestrictions?.qtd_pefin
@@ -490,8 +484,6 @@ export function getMantyzItems(data?: GetMantyzResponse['content']): InfoCardIte
 
 	const debtsCount = marketRestrictions?.qtd_dividas_vencidas
 	const debtsValue = marketRestrictions?.valor_dividas_venciadas
-
-	const paymentHistory = evolution?.evolucao_historico_pagamento
 
 	return [
 		{

@@ -204,7 +204,7 @@ export function CnpjSearchPage() {
 
 							<div className='bg-card rounded-lg border border-border p-4'>
 								<div className='flex items-center justify-between mb-4'>
-									<div className='text-sm font-semibold text-foreground'>Score Sábia</div>
+									<div className='text-sm font-semibold text-foreground'>Score Sabia</div>
 									<SabiaScoreModal calculation={sabiaScore} />
 								</div>
 

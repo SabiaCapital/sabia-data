@@ -508,6 +508,21 @@ type GeralDadosGerais = {
 			data_alteracao: string
 		}[]
 	} | null
+	porte: string | null
+	porte_comercial: string | null
+	tipo_unidade: string | null
+	filiais: number | null
+	funcionarios: number | null
+	regime_tributario: string | null
+	comex: string | null
+	inscricao_estadual: string | null
+	situacao_receita_descricao: string | null
+	situacao_receita_data: string | null
+	situacao_especial: string | null
+	data_situacao_especial: string | null
+	faturamento_presumido: number | null
+	descricao_natureza: string | null
+	dados_sintegra: { status: string | null } | null
 }
 
 type GeralEnderecoPrincipal = {
@@ -519,13 +534,100 @@ type GeralEnderecoPrincipal = {
 	complemento: string | null
 }
 
+type ScorePoint = {
+	variavel_valor: string | boolean | null
+	peso: number
+	faixa_pontuacao: string
+	pontuacao: number | null
+	valor: number | null
+	descricao: string
+	valor_restricao: number | null
+	texto_exibido_nos_indicadores: string
+}
+
 export type GetMantyzCreditResponse = {
 	content: {
 		identificacao: {
 			dados_gerais: GeralDadosGerais
 			dados_localizacao_contato: {
 				endereco_principal: GeralEnderecoPrincipal
+				telefones: string[]
+				emails: string[]
+				outros_enderecos: {
+					logradouro: string
+					numero: string
+					bairro: string
+					municipio: string
+					uf: string
+					cep: string
+					complemento: string | null
+				}[]
 			}
 		}
+		score: {
+			dados_gerais_score: {
+				cnpj_cpf: string
+				score: number | null
+				limite_sugerido: number
+				limite_solicitado: number
+				politica_credito: string
+				validade: string
+				analise_resultado: string
+				ressalva: boolean
+				faturamento_presumido: number | null
+				inclusao: string
+				bloqueado: boolean
+				id_cliente: number
+			}
+			pontos_positivos: ScorePoint[]
+			pontos_atencao: ScorePoint[]
+			pontos_negativos: ScorePoint[]
+			notificacoes: {
+				nome: string
+				descricao_evento: string
+				descricao_faixa: string
+			}[]
+		} | null
+		pendencias_financeiras: {
+			pgfn_debito_governo: {
+				nome: string | null
+				valor_total_debito: number
+				qtd_total_debito: number
+				lista_debito_governo_origem: { nome: string; valor: number; quantidade: number }[]
+				lista_debito: {
+					origem: string
+					valor_consolidado: number
+					tipo_devedor: string
+					unidade_responsavel: string
+					uf_unidade_responsavel: string
+					numero_registro: string
+					situacao_registro_tipo: string
+					situacao_registro: string
+					indicador_arquivado: boolean
+					data_registro: string
+				}[]
+			} | null
+			cndt: {
+				atual: {
+					data_consulta: string
+					numero_protocolo: string
+					status: string
+					em_debito: boolean
+					texto_certificado: string
+					expiracao: string
+					base64_pdf: string | null
+				}
+				historico: any | null
+			} | null
+			fgts: {
+				atual: {
+					status: string
+					validade_inicio: string
+					validade_fim: string
+					base64_pdf: string | null
+				}
+				historico: any | null
+			} | null
+		} | null
 	} | null
 }

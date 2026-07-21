@@ -54,11 +54,13 @@ export function InfoCard({
 					<p>Ocorreu um erro ao buscar os dados. Tente novamente mais tarde.</p>
 				) : (
 					<>
-						{items.map(({ label, value }) => (
-							<span key={label} className='text-muted-foreground text-sm'>
-								<span key={label} className='text-foreground font-medium'>
-									{label}:{' '}
-								</span>
+						{items.map(({ label, value }, i) => (
+							<span key={label || i} className='text-muted-foreground text-sm'>
+								{label && (
+									<span className='text-foreground font-medium'>
+										{label}:{' '}
+									</span>
+								)}
 								{value}
 							</span>
 						))}

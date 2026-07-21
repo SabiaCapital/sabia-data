@@ -310,7 +310,7 @@ export function getScoreItems(
 	) : dgs.ressalva ? (
 		<Badge variant='secondary'>RESSALVA</Badge>
 	) : (
-		<Badge className='status-approved'>APROVADO</Badge>
+		<Badge style={{ backgroundColor: '#22c55e', color: 'white', border: 'none' }}>APROVADO</Badge>
 	)
 
 	const validadeFormatted = (() => {

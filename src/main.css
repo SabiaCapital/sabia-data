@@ -190,15 +190,3 @@
 		@apply bg-background text-foreground;
 	}
 }
-
-@layer components {
-	.status-approved {
-		border: transparent;
-		background-color: #22c55e;
-		color: white;
-	}
-	
-	.status-approved:hover {
-		background-color: #16a34a;
-	}
-}

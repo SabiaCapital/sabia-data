@@ -193,6 +193,12 @@
 
 @layer components {
 	.status-approved {
-		@apply border-transparent bg-green-600 text-white [a&]:hover:bg-green-700;
+		border: transparent;
+		background-color: #22c55e;
+		color: white;
+	}
+	
+	.status-approved:hover {
+		background-color: #16a34a;
 	}
 }

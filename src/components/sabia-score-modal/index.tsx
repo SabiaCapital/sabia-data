@@ -39,7 +39,7 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 
 			<SheetContent side='right' className='w-full max-w-md overflow-hidden'>
 				<SheetHeader className='flex flex-row items-center justify-between'>
-					<SheetTitle>Score Sábia</SheetTitle>
+					<SheetTitle>Score Sabia</SheetTitle>
 
 					<SheetClose asChild>
 						<Button type='button' variant='ghost' size='icon' className='h-8 w-8'>

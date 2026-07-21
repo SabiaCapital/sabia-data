@@ -1,13 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-	Sheet,
-	SheetClose,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { formatCurrency } from '@/utils/number'
@@ -51,16 +45,22 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 				<ScrollArea className='h-[calc(100vh-80px)]'>
 					<div className='space-y-6 p-4'>
 						<div>
-							<h3 className='text-sm font-semibold text-foreground mb-4'>Memória de Cálculo</h3>
+							<h3 className='text-foreground mb-4 text-sm font-semibold'>
+								Memória de Cálculo
+							</h3>
 
 							{/* Company Age */}
-							<div className='space-y-2 mb-4'>
-								<div className='text-sm font-medium text-foreground'>Tempo de empresa</div>
-								<div className='text-sm text-muted-foreground'>
-									{calculation.breakdown.companyAge.years}
-									{calculation.breakdown.companyAge.years === 1 ? ' ano' : ' anos'}
+							<div className='mb-4 space-y-2'>
+								<div className='text-foreground text-sm font-medium'>
+									Tempo de empresa
 								</div>
-								<div className='text-sm font-semibold text-foreground'>
+								<div className='text-muted-foreground text-sm'>
+									{calculation.breakdown.companyAge.years}
+									{calculation.breakdown.companyAge.years === 1
+										? ' ano'
+										: ' anos'}
+								</div>
+								<div className='text-foreground text-sm font-semibold'>
 									{calculation.breakdown.companyAge.points} pontos
 								</div>
 							</div>
@@ -68,14 +68,16 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 							<Separator className='my-3' />
 
 							{/* Revenue */}
-							<div className='space-y-2 mb-4'>
-								<div className='text-sm font-medium text-foreground'>Faturamento</div>
-								<div className='text-sm text-muted-foreground'>
+							<div className='mb-4 space-y-2'>
+								<div className='text-foreground text-sm font-medium'>
+									Faturamento
+								</div>
+								<div className='text-muted-foreground text-sm'>
 									{calculation.breakdown.revenue.value > 0
 										? formatCurrency(calculation.breakdown.revenue.value)
 										: 'Não informado'}
 								</div>
-								<div className='text-sm font-semibold text-foreground'>
+								<div className='text-foreground text-sm font-semibold'>
 									{calculation.breakdown.revenue.points} pontos
 								</div>
 							</div>
@@ -83,14 +85,16 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 							<Separator className='my-3' />
 
 							{/* Capital Stock */}
-							<div className='space-y-2 mb-4'>
-								<div className='text-sm font-medium text-foreground'>Capital Social</div>
-								<div className='text-sm text-muted-foreground'>
+							<div className='mb-4 space-y-2'>
+								<div className='text-foreground text-sm font-medium'>
+									Capital Social
+								</div>
+								<div className='text-muted-foreground text-sm'>
 									{calculation.breakdown.capitalStock.value > 0
 										? formatCurrency(calculation.breakdown.capitalStock.value)
 										: 'Não informado'}
 								</div>
-								<div className='text-sm font-semibold text-foreground'>
+								<div className='text-foreground text-sm font-semibold'>
 									{calculation.breakdown.capitalStock.points} pontos
 								</div>
 							</div>
@@ -98,14 +102,18 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 							<Separator className='my-3' />
 
 							{/* Restrictions */}
-							<div className='space-y-2 mb-4'>
-								<div className='text-sm font-medium text-foreground'>Restritivos</div>
-								<div className='text-sm text-muted-foreground'>
+							<div className='mb-4 space-y-2'>
+								<div className='text-foreground text-sm font-medium'>
+									Restritivos
+								</div>
+								<div className='text-muted-foreground text-sm'>
 									{calculation.breakdown.restrictions.totalValue > 0
-										? formatCurrency(calculation.breakdown.restrictions.totalValue)
+										? formatCurrency(
+												calculation.breakdown.restrictions.totalValue
+											)
 										: 'Sem restritivos'}
 								</div>
-								<div className='text-sm font-semibold text-foreground'>
+								<div className='text-foreground text-sm font-semibold'>
 									{calculation.breakdown.restrictions.points} pontos
 								</div>
 							</div>
@@ -113,12 +121,14 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 							<Separator className='my-3' />
 
 							{/* Society Status */}
-							<div className='space-y-2 mb-4'>
-								<div className='text-sm font-medium text-foreground'>Situação societária</div>
-								<div className='text-sm text-muted-foreground'>
+							<div className='mb-4 space-y-2'>
+								<div className='text-foreground text-sm font-medium'>
+									Situação societária
+								</div>
+								<div className='text-muted-foreground text-sm'>
 									{calculation.breakdown.societyStatus.description}
 								</div>
-								<div className='text-sm font-semibold text-foreground'>
+								<div className='text-foreground text-sm font-semibold'>
 									{calculation.breakdown.societyStatus.points} pontos
 								</div>
 							</div>
@@ -126,12 +136,12 @@ export function SabiaScoreModal({ calculation }: SabiaScoreModalProps) {
 							<Separator className='my-4' />
 
 							{/* Total */}
-							<div className='space-y-2 mb-4 bg-secondary/50 p-3 rounded'>
-								<div className='text-sm font-medium text-foreground'>Total</div>
-								<div className='text-base font-semibold text-foreground'>
+							<div className='bg-secondary/50 mb-4 space-y-2 rounded p-3'>
+								<div className='text-foreground text-sm font-medium'>Total</div>
+								<div className='text-foreground text-base font-semibold'>
 									{calculation.totalScore} / {calculation.maxScore}
 								</div>
-								<div className='text-xs text-muted-foreground'>
+								<div className='text-muted-foreground text-xs'>
 									Classificação: {calculation.classification}
 								</div>
 							</div>

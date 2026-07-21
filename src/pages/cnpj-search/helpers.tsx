@@ -310,7 +310,7 @@ export function getScoreItems(
 	) : dgs.ressalva ? (
 		<Badge variant='secondary'>RESSALVA</Badge>
 	) : (
-		<Badge>APROVADO</Badge>
+		<Badge className='status-approved'>APROVADO</Badge>
 	)
 
 	const validadeFormatted = (() => {

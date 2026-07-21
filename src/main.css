@@ -190,3 +190,9 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+@layer components {
+	.status-approved {
+		@apply border-transparent bg-green-600 text-white [a&]:hover:bg-green-700;
+	}
+}

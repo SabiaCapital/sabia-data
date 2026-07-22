@@ -298,6 +298,7 @@ export function getScoreItems(
 	const notificacoes = (score?.notificacoes ?? []).filter(
 		(n) => n.descricao_evento !== 'Bloqueio'
 	)
+	const pontosPositivos = score?.pontos_positivos ?? []
 	const pontosNegativos = score?.pontos_negativos ?? []
 	const pontosAtencao = score?.pontos_atencao ?? []
 
@@ -361,6 +362,22 @@ export function getScoreItems(
 					columns={[
 						{ header: 'Tipo', render: (n) => n.nome },
 						{ header: 'Detalhe', render: (n) => n.descricao_faixa },
+					]}
+				/>
+			) : (
+				'-'
+			),
+		},
+		{
+			label: 'Pontos positivos',
+			value: pontosPositivos.length ? (
+				<ListDrawer
+					title='Pontos positivos'
+					triggerLabel={`Ver ${pontosPositivos.length} ${pontosPositivos.length === 1 ? 'ponto' : 'pontos'}`}
+					data={pontosPositivos}
+					columns={[
+						{ header: 'Critério', render: (p) => p.descricao },
+						{ header: 'Valor', render: (p) => p.texto_exibido_nos_indicadores },
 					]}
 				/>
 			) : (

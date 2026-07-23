@@ -53,6 +53,36 @@ export async function getMantyz(cnpj: string) {
 	return response.data.content
 }
 
+export async function requestAnalysis(
+	cnpj: string,
+	idPoliticaCredito: number = 1,
+	limitesSolicitado: number = 0
+): Promise<{ protocolo: string; mensagem_alerta: string | null }> {
+	const cleanCnpj = cnpj.replace(/\D/g, '')
+	
+	const resp = await api.post<{
+		content: { protocolo: string; mensagem_alerta: string | null }
+		success: boolean
+		error_message: string | null
+	}>(
+		'motoranalise/api/consultar/analise',
+		{
+			dados: {
+				documento: cleanCnpj,
+				id_politica_credito_padrao: idPoliticaCredito,
+				dados_motor: null,
+				limite_solicitado: limitesSolicitado,
+			},
+		}
+	)
+
+	if (!resp.data.success) {
+		throw new Error(resp.data.error_message || 'Erro ao disparar análise')
+	}
+
+	return resp.data.content
+}
+
 export async function getMantyzGeral(cnpj: string): Promise<GetMantyzCreditResponse['content']> {
 	const now = new Date()
 	const months: { ano: number; mes: number }[] = []
@@ -76,7 +106,17 @@ export async function getMantyzGeral(cnpj: string): Promise<GetMantyzCreditRespo
 		}
 	}
 
-	if (!analysisId) return null
+	// Se não encontrou análise anterior, dispara uma nova
+	if (!analysisId) {
+		try {
+			await requestAnalysis(cnpj)
+			// Retorna null indicando que foi disparada uma análise e está processando
+			return null
+		} catch (error) {
+			console.error('Erro ao disparar análise:', error)
+			return null
+		}
+	}
 
 	const resp = await api.post<GetMantyzCreditResponse>(
 		'integracaomotor/portal/api/consulta/geral',

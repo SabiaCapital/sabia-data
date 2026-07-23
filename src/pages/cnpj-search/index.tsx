@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import {
 	Landmark,
 	Search,
@@ -36,6 +37,8 @@ import { getCompanyItems, getScoreItems, getMarketRestrictionsItems, getRestitiv
 
 export function CnpjSearchPage() {
 	const [searchedCnpj, setSearchedCnpj] = useState<string | null>(null)
+	const [isPolling, setIsPolling] = useState(false)
+	const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
 	const form = useForm({
 		defaultValues: {
@@ -68,6 +71,76 @@ export function CnpjSearchPage() {
 		mantyzQuery.isError && (mantyzQuery.error as any)?.response?.status === 412
 
 	const isLoading = mantyzQuery.isFetching || geralQuery.isFetching
+
+	// Detecta quando análise foi disparada (geralQuery retorna null)
+	const analysisDispatched = mantyzQuery.data && !geralQuery.data && !geralQuery.isFetching
+
+	// Função para tocar som
+	const playSound = () => {
+		const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+		const oscillator = audioContext.createOscillator()
+		const gainNode = audioContext.createGain()
+
+		oscillator.connect(gainNode)
+		gainNode.connect(audioContext.destination)
+
+		oscillator.frequency.value = 800
+		oscillator.type = 'sine'
+
+		gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+		gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+
+		oscillator.start(audioContext.currentTime)
+		oscillator.stop(audioContext.currentTime + 0.5)
+	}
+
+	// Polling para verificar quando os dados chegam
+	useEffect(() => {
+		if (!analysisDispatched) {
+			// Para polling se análise não foi disparada
+			if (pollingIntervalRef.current) {
+				clearInterval(pollingIntervalRef.current)
+				pollingIntervalRef.current = null
+			}
+			setIsPolling(false)
+			return
+		}
+
+		setIsPolling(true)
+		const pollData = async () => {
+			try {
+				const data = await getMantyzGeral(searchedCnpj!)
+				if (data) {
+					// Dados chegaram!
+					playSound()
+					toast.success('✅ Dados da análise de crédito chegaram! Atualizando tela...', {
+						duration: 5000,
+					})
+					// Limpa o polling
+					if (pollingIntervalRef.current) {
+						clearInterval(pollingIntervalRef.current)
+						pollingIntervalRef.current = null
+					}
+					setIsPolling(false)
+					// Refetch dos dados
+					geralQuery.refetch()
+				}
+			} catch (error) {
+				console.error('Erro ao fazer polling:', error)
+			}
+		}
+
+		// Começa polling a cada 10 segundos
+		pollingIntervalRef.current = setInterval(pollData, 10000)
+
+		// Cleanup
+		return () => {
+			if (pollingIntervalRef.current) {
+				clearInterval(pollingIntervalRef.current)
+				pollingIntervalRef.current = null
+			}
+		}
+	}, [analysisDispatched, searchedCnpj, geralQuery])
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -184,8 +257,17 @@ export function CnpjSearchPage() {
 							<AlertCircleIcon />
 
 							<AlertDescription>
-								✅ Análise de crédito foi disparada! A Mantyz está processando os dados
-								deste CNPJ. Tente novamente em alguns minutos.
+								{isPolling ? (
+									<>
+										⏳ Análise de crédito foi disparada! A Mantyz está processando os dados deste
+										CNPJ. Verificando a cada 10 segundos...
+									</>
+								) : (
+									<>
+										✅ Análise de crédito foi disparada! A Mantyz está processando os dados
+										deste CNPJ. Tente novamente em alguns minutos.
+									</>
+								)}
 							</AlertDescription>
 						</Alert>
 					)}

@@ -179,6 +179,17 @@ export function CnpjSearchPage() {
 						</AlertDescription>
 					</Alert>
 
+					{!geralQuery.isFetching && !geralQuery.data && mantyzQuery.data && (
+						<Alert variant='default'>
+							<AlertCircleIcon />
+
+							<AlertDescription>
+								✅ Análise de crédito foi disparada! A Mantyz está processando os dados
+								deste CNPJ. Tente novamente em alguns minutos.
+							</AlertDescription>
+						</Alert>
+					)}
+
 					<div className='grid grid-cols-3 gap-4'>
 						<InfoCard
 							className='col-span-2'
